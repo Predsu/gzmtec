@@ -1,6 +1,6 @@
-import { createPool } from 'mysql2/promise';
+const mysql = require('mysql2/promise');
 
-let pool = createPool({
+const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
@@ -11,4 +11,4 @@ let pool = createPool({
 });
 console.log("Established connection with database");
 
-export default pool;
+module.exports = pool;
