@@ -10,7 +10,8 @@ const runDeviationJob = async () => {
   isDeviationJobRunning = true;
   try {
     const inserted = await deviationLoggerService.logActiveVehicleDeviations();
-    console.log(`Deviation logger inserted ${inserted} rows.`);
+    const currentTime = new Date().toLocaleTimeString();
+    console.log(`Deviation logger inserted ${inserted} rows at ${currentTime}.`);
   } catch (error) {
     console.error('Deviation logger failed:', error);
   } finally {
