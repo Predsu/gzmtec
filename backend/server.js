@@ -19,8 +19,9 @@ app.use(express.json());
 
 const db = require('./config/db');
 const deviationLoggerController = require('./controllers/deviationLogger.controller');
+const deviationOperationsController = require('./controllers/deviationOperations.controller');
 
-app.get('/deviations/estimate', deviationLoggerController.estimateDeviation);
+app.get('/deviations/estimate', deviationOperationsController.estimateDeviation);
 
 app.get('/api/status', (req, res) => {
   res.json({ working: true, time: new Date().toISOString() });

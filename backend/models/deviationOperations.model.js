@@ -8,24 +8,26 @@ const getCurrentWeekdayName = () => new Intl.DateTimeFormat('en-US', {
 }).format(new Date());
 
 const deviationOperationsModel = {
-    getAvgDeviationByLineStopTime: async (lineLabel, stopId, timestamp, tolerance) => {
+    getAvgDeviationByLineStopTime: async (lineLabel, stopId, timestamp, tolerance, weekday) => {
         const targetTime = Number(timestamp);
-
+        
         const sql = `
             SELECT 
-                AVG(deviation) AS average_deviation, 
-                COUNT(*) AS samples 
+                id, 
+                deviation, 
+                timestamp 
             FROM deviations 
             WHERE lineLabel = ? 
             AND stop_id = ? 
             AND timestamp BETWEEN ? AND ?
+            AND weekday = ?
         `;
         
-        const minTime = targetTime - tolerance;
-        const maxTime = targetTime + tolerance;
+        const minTime = targetTime - Number(tolerance);
+        const maxTime = targetTime + Number(tolerance);
 
-        const result = await db.query(sql, [lineLabel, stopId, minTime, maxTime]);
-        return result[0];
+        const [rows] = await db.query(sql, [lineLabel, stopId, minTime, maxTime, weekday]);
+        return rows; 
     }
 };
 
