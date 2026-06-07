@@ -18,7 +18,7 @@ app.use(cors({
 app.use(express.json());
 
 const db = require('./config/db');
-const deviationLoggerController = require('./controllers/deviationLogger.controler');
+const deviationLoggerController = require('./controllers/deviationLogger.controller');
 
 app.get('/deviations/estimate', deviationLoggerController.estimateDeviation);
 
