@@ -11,8 +11,26 @@ const pool = mysql.createPool({
   database: process.env.DB_DBNAME,
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  timezone: '+00:00',
+  dateStrings: true
 });
-console.log("Established connection with database");
+(async () => {
+    try {
+        // Próbujemy pobrać połączenie z puli i wykonać banalne zapytanie
+        const connection = await pool.getConnection();
+        console.log('✅ SUKCES: Połączenie z bazą danych przez tunel SSH zostało ustanowione!');
+        
+        // Opcjonalnie: sprawdźmy, co baza myśli o swojej strefie czasowej
+        const [rows] = await connection.query('SELECT NOW() AS current_db_time, @@global.time_zone, @@session.time_zone');
+        console.log('⏰ Czas i strefa w bazie danych:', rows[0]);
+        
+        connection.release(); // Zwalniamy połączenie z powrotem do puli
+    } catch (error) {
+        console.error('❌ BŁĄD POŁĄCZENIA Z BAZĄ DANYCH:');
+        console.error(error.message);
+        console.error('Sprawdź, czy Twój tunel SSH na porcie', process.env.DB_PORT, 'jest na pewno otwarty.');
+    }
+})();
 
 module.exports = pool;

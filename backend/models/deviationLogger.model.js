@@ -1,30 +1,34 @@
 const db = require('../config/db');
 
-const WEEKDAY_TIME_ZONE = process.env.WEEKDAY_TIME_ZONE || 'Europe/Warsaw';
-
-const getCurrentWeekdayName = () => new Intl.DateTimeFormat('en-US', {
-    weekday: 'long',
-    timeZone: WEEKDAY_TIME_ZONE,
-}).format(new Date());
-
 const deviationLoggerModel = {
-    logDeviation:  async (trip, lineLabel, stop_id, vehicle_id, deviation) => {
-        const weekday = getCurrentWeekdayName();
-        const result = await db.query("INSERT INTO deviations (trip, lineLabel, stop_id, vehicle_id, deviation, weekday, arrival_time) VALUES (?, ?, ?, ?, ?, ?, NOW())", [trip, lineLabel, stop_id, vehicle_id, deviation, weekday]);
+    logDeviation: async (trip, lineLabel, stop_id, vehicle_id, deviation) => {
+        const weekday = new Intl.DateTimeFormat('en-US', { weekday: 'long', timeZone: 'Europe/Warsaw' }).format(new Date());
+        const result = await db.query(
+            "INSERT INTO deviations (trip, lineLabel, stop_id, vehicle_id, deviation, weekday, arrival_time) VALUES (?, ?, ?, ?, ?, ?, NOW())", 
+            [trip, lineLabel, stop_id, vehicle_id, deviation, weekday]
+        );
         return result[0].insertId;
     },
-    displayDeviationsAverage: async () => {
-        const result = await db.query("SELECT trip, AVG(deviation) AS average_deviation FROM deviations GROUP BY trip");
-        return result[0];
+    
+    getAllDeviationsByLineStop: async (lineLabel, stopId) => {
+        const sql = "SELECT id, trip, lineLabel, stop_id, vehicle_id, deviation, arrival_time, weekday " +
+                    "FROM deviations " +
+                    "WHERE lineLabel = ? AND stop_id = ? " +
+                    "ORDER BY arrival_time DESC";
+                    
+        const result = await db.query(sql, [lineLabel, stopId]);
+        return result[0]; // Zwraca tablicę bezpośrednio bez rozbijania [rows]
     },
-    getAverageDeviationByLineStopTime: async (lineLabel, stopId, secondsOfDay, windowSeconds) => {
-        const sql = "SELECT AVG(deviation) AS average_deviation, COUNT(*) AS samples " +
+    
+    getDeviationSamplesByLineStopWeekdayTime: async (lineLabel, stopId, weekdayIndex, targetSecondsOfDay, windowSeconds) => {
+        const sql = "SELECT deviation " +
             "FROM deviations " +
-            "WHERE lineLabel = ? AND stop_id = ? " +
-            "AND LEAST(ABS(TIME_TO_SEC(TIME(arrival_time)) - ?), 86400 - ABS(TIME_TO_SEC(TIME(arrival_time)) - ?)) <= ?";
-        const result = await db.query(sql, [lineLabel, stopId, secondsOfDay, secondsOfDay, windowSeconds]);
-        return result[0];
+            "WHERE lineLabel = ? AND stop_id = ? AND WEEKDAY(arrival_time) = ? " +
+            "AND ABS(TIME_TO_SEC(CAST(arrival_time AS TIME)) - ?) <= ?";
+
+        const result = await db.query(sql, [lineLabel, stopId, weekdayIndex, targetSecondsOfDay, windowSeconds]);
+        return result[0]; // Zwraca tablicę bezpośrednio
     }
-}
+};
 
 module.exports = deviationLoggerModel;
