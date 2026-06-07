@@ -12,27 +12,19 @@ const deviationLoggerController = {
         }
     },
     estimateDeviation: async (req, res) => {
-        const { lineLabel, stopId, datetime } = req.query;
-        if (!lineLabel || !stopId || !datetime) {
-            return res.status(400).json({ message: "lineLabel, stopId, and datetime are required" });
+        const { lineLabel, stopId, timestamp } = req.query;
+        if (!lineLabel || !stopId || !timestamp) {
+            return res.status(400).json({ message: "lineLabel, stopId, and timestamp are required" });
         }
-
-        const requested = new Date(datetime);
-        if (Number.isNaN(requested.getTime())) {
-            return res.status(400).json({ message: "Invalid datetime" });
-        }
-
-        const secondsOfDay = (requested.getHours() * 3600) + (requested.getMinutes() * 60) + requested.getSeconds();
-        const windowSeconds = 2 * 60;
 
         try {
-            const rows = await deviationLoggerModel.getAverageDeviationByLineStopTime(lineLabel, stopId, secondsOfDay, windowSeconds);
+            const rows = await deviationLoggerModel.getAvgDeviationByLineStopTime(lineLabel, stopId, timestamp);
             const row = Array.isArray(rows) ? rows[0] : null;
             const averageDeviation = row?.average_deviation === null || row?.average_deviation === undefined ? null : Math.round(row.average_deviation);
-            res.status(200).json({ lineLabel, stopId, datetime, averageDeviation, samples: row?.samples || 0 });
+            res.status(200).json({ lineLabel, stopId, timestamp, averageDeviation, samples: row?.samples || 0 });
         } catch (error) {
             console.error("Error estimating deviation:", error);
-            res.status(500).json({ message: "Error estimating deviation" });
+            res.status(500).json({ message: "Error estimating deviation", error: error.message });
         }
     }
 }
