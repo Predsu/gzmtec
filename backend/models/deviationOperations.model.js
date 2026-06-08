@@ -27,6 +27,7 @@ const deviationOperationsModel = {
         const maxTime = targetTime + Number(tolerance);
 
         const [rows] = await db.query(sql, [lineLabel, stopId, minTime, maxTime, weekday]);
+        console.log(rows);
         return rows; 
     }
 };

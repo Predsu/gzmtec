@@ -11,7 +11,7 @@ export interface Leg {
   route: { shortName: string } | null;
   from: { name: string; stop?: { gtfsId: string } | null };
   to: { name: string };
-  predictedDeviationSeconds?: number;
+  predictedDeviationMinutes?: number;
   predictedSamplesCount?: number;
   expectedStartTime?: number;
 }
@@ -41,8 +41,8 @@ export class TripPlannerDisplayerComponent implements OnInit {
     const fromLon = 18.91225;
     const toLat = 50.27091;
     const toLon = 18.99703;
-    const date = '2026-06-10'; 
-    const time = '12:47';
+    const date = '2026-06-09'; 
+    const time = '14:50';
 
     const data = await this.tripService.getRoute(fromLat, fromLon, toLat, toLon, date, time);
     

@@ -54,14 +54,14 @@
               </div>
 
               <div class="text-end ps-2">
-                @if (leg.predictedDeviationSeconds && leg.predictedDeviationSeconds > 0) {
+                @if (leg.predictedDeviationMinutes && leg.predictedDeviationMinutes > 0) {
                   <span class="text-muted text-decoration-line-through small d-block" style="font-size: 0.8rem;">
                     {{ leg.startTime | date:'HH:mm' }}
                   </span>
                   <span class="text-danger fw-bold d-block" style="font-size: 0.95rem;">
                     {{ leg.expectedStartTime | date:'HH:mm' }}
                     <span class="d-block text-danger opacity-75" style="font-size: 0.7rem; font-weight: 500;">
-                      +{{ Math.round(leg.predictedDeviationSeconds / 60) }} min prognozy
+                      +{{ leg.predictedDeviationMinutes }} min prognozy
                     </span>
                   </span>
                 } @else {

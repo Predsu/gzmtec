@@ -44,7 +44,7 @@ const tripPlannerController = {
         }
 
         try {
-            const otpEndpoint = 'http://localhost:8890/otp/routers/default/index/graphql';
+            const otpEndpoint = `http://${process.env.JVM_HOST}:${process.env.JVM_PORT}/otp/routers/default/index/graphql`;
 
             const otpResponse = await axios.post(otpEndpoint, {
                 query: OTP2_GTFS_GRAPHQL_QUERY,
@@ -74,7 +74,7 @@ const tripPlannerController = {
                 return res.status(404).json({ message: "no connections found for this input" });
             }
 
-            const itinerary = itineraries[0];
+            const itinerary = JSON.parse(JSON.stringify(itineraries[0]));
 
             for (let leg of itinerary.legs) {
                 if (leg.mode === 'BUS' || leg.mode === 'TRAM') {
@@ -123,15 +123,15 @@ const tripPlannerController = {
                                 const logSum = samplesList.reduce((sum, row) => sum + Math.log(row.deviation + 1), 0);
                                 const logAverage = logSum / samplesCount;
                                 predictedDeviation = Math.round(Math.exp(logAverage) - 1);
-                                console.log(`counted estimated deviation: ${predictedDeviation}`);
+                                console.log(`counted estimated deviation: ${predictedDeviation} min`);
                             }
                         } catch (dbError) {
                             console.error("TripPlanner ERR: ", dbError.message);
                         }
 
-                        leg.predictedDeviationSeconds = predictedDeviation;
+                        leg.predictedDeviationMinutes = predictedDeviation;
                         leg.predictedSamplesCount = samplesCount;
-                        leg.expectedStartTime = leg.startTime + (predictedDeviation * 1000);
+                        leg.expectedStartTime = leg.startTime + (predictedDeviation * 60 * 1000);
                         
                         console.log(`=== finished for ${lineLabel} ===\n`);
 
