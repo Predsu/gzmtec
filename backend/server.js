@@ -3,10 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 
-dotenv.config({ path: path.resolve(__dirname, '.env') });
-
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 app.use(cors({
   origin: 'http://localhost:4200',
@@ -14,6 +11,9 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
+dotenv.config({ path: path.resolve(__dirname, '.env') });
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
