@@ -1,0 +1,124 @@
+<div class="card border-0 shadow-sm mx-auto my-4 text-secondary bg-white" style="max-width: 550px;" *ngIf="itinerary">
+  
+  <div class="card-header bg-transparent border-0 pt-4 px-4 pb-2">
+    <div class="d-flex justify-content-between align-items-center">
+      <h6 class="text-uppercase tracking-wider text-muted font-weight-bold mb-0" style="font-size: 0.8rem; letter-spacing: 1px;">
+        Szczegóły podróży
+      </h6>
+      <span class="badge bg-light text-dark border px-2 py-1 small fw-normal">
+        GZM Metropolia
+      </span>
+    </div>
+  </div>
+  
+  <div class="card-body px-4 pt-2 pb-4">
+    <div class="position-relative container-fluid px-0">
+      
+      @for (leg of itinerary.legs; track $index) {
+        <div class="d-flex position-relative" [class.mb-0]="$last">
+          
+          <div class="d-flex flex-column align-items-center position-relative me-3">
+            <div class="rounded-circle border border-2 border-white shadow-sm" 
+                 [ngClass]="leg.mode === 'WALK' ? 'bg-secondary' : leg.mode === 'BUS' ? 'bg-warning' : 'bg-danger'"
+                 style="width: 14px; height: 14px; z-index: 2; margin-top: 5px;">
+            </div>
+            <div class="position-absolute h-100 border-start border-2 opacity-50"
+                 [ngClass]="leg.mode === 'WALK' ? 'border-secondary border-dashed' : leg.mode === 'BUS' ? 'border-warning' : 'border-danger'"
+                 style="left: 50%; transform: translateX(-50%); top: 12px; z-index: 1;"
+                 *ngIf="!$last">
+            </div>
+          </div>
+
+          <div class="flex-grow-1 pb-4">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <div>
+                <span class="fw-semibold text-dark d-block" style="font-size: 1rem;">
+                  {{ leg.from.name }}
+                </span>
+                
+                <div class="d-flex align-items-center gap-2 mt-1">
+                  <span class="text-uppercase fw-bold text-muted small" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                    {{ leg.mode === 'WALK' ? 'Pieszo' : leg.mode === 'BUS' ? 'Autobus' : 'Tramwaj' }}
+                  </span>
+                  @if (leg.route) {
+                    <span class="badge rounded-1 px-2 py-0.5 text-white fw-bold shadow-sm"
+                          [ngClass]="leg.mode === 'BUS' ? 'bg-warning text-dark' : 'bg-danger'"
+                          style="font-size: 0.75rem;">
+                      {{ leg.route.shortName }}
+                    </span>
+                  }
+                  <span class="text-muted small" style="font-size: 0.75rem;">
+                    &middot; {{ Math.ceil(leg.duration / 60) }} min
+                  </span>
+                </div>
+              </div>
+
+              <div class="text-end ps-2">
+                @if (leg.predictedDeviationSeconds && leg.predictedDeviationSeconds > 0) {
+                  <span class="text-muted text-decoration-line-through small d-block" style="font-size: 0.8rem;">
+                    {{ leg.startTime | date:'HH:mm' }}
+                  </span>
+                  <span class="text-danger fw-bold d-block" style="font-size: 0.95rem;">
+                    {{ leg.expectedStartTime | date:'HH:mm' }}
+                    <span class="d-block text-danger opacity-75" style="font-size: 0.7rem; font-weight: 500;">
+                      +{{ Math.round(leg.predictedDeviationSeconds / 60) }} min prognozy
+                    </span>
+                  </span>
+                } @else {
+                  <span class="text-dark fw-bold d-block" style="font-size: 0.95rem;">
+                    {{ leg.startTime | date:'HH:mm' }}
+                  </span>
+                  @if (leg.mode !== 'WALK') {
+                    <span class="text-success d-block" style="font-size: 0.7rem; font-weight: 500;">
+                      Rozkładowo
+                    </span>
+                  }
+                }
+              </div>
+            </div>
+
+            <div class="text-muted small mt-1" style="font-size: 0.85rem;">
+              Kierunek: <span class="text-dark">{{ leg.to.name }}</span>
+            </div>
+
+            @if (leg.mode !== 'WALK' && leg.predictedSamplesCount !== undefined) {
+              <div class="mt-2 pt-1 border-top border-light text-muted opacity-75" style="font-size: 0.75rem;">
+                @if (leg.predictedSamplesCount > 0) {
+                  <span>Model oparty o <strong>{{ leg.predictedSamplesCount }}</strong> historycznych kursów.</span>
+                } @else {
+                  <span class="fst-italic">Brak danych historycznych dla tego przebiegu.</span>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="d-flex position-relative">
+        <div class="d-flex flex-column align-items-center me-3 position-relative">
+          <div class="rounded-circle bg-dark border border-2 border-white shadow-sm" 
+               style="width: 14px; height: 14px; z-index: 2; margin-top: 5px;">
+          </div>
+        </div>
+        <div class="flex-grow-1">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <span class="fw-bold text-dark d-block" style="font-size: 1rem;">
+                {{ itinerary.legs[itinerary.legs.length - 1].to.name }}
+              </span>
+              <span class="text-uppercase fw-bold text-muted small" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                Miejsce docelowe
+              </span>
+            </div>
+            <div class="text-end">
+              <span class="badge bg-dark text-white fw-bold px-2 py-1" style="font-size: 0.9rem;">
+                {{ itinerary.legs[itinerary.legs.length - 1].endTime | date:'HH:mm' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

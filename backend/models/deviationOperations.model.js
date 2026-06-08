@@ -8,18 +8,18 @@ const getCurrentWeekdayName = () => new Intl.DateTimeFormat('en-US', {
 }).format(new Date());
 
 const deviationOperationsModel = {
-    getAvgDeviationByLineStopTime: async (lineLabel, stopId, timestamp, tolerance, weekday) => {
-        const targetTime = Number(timestamp);
+    getAvgDeviationByLineStopTime: async (lineLabel, stopId, secondsSinceMidnight, tolerance, weekday) => {
+        const targetTime = Number(secondsSinceMidnight);
         
         const sql = `
             SELECT 
                 id, 
                 deviation, 
-                timestamp 
+                departure_seconds 
             FROM deviations 
             WHERE lineLabel = ? 
             AND stop_id = ? 
-            AND timestamp BETWEEN ? AND ?
+            AND departure_seconds BETWEEN ? AND ?
             AND weekday = ?
         `;
         

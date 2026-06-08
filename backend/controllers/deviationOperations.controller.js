@@ -31,8 +31,8 @@ const deviationOperationsController = {
             });
 
         } catch (error) {
-            console.error("Error estimating deviation:", error);
-            res.status(500).json({ message: "Error estimating deviation", error: error.message });
+            console.error("ERR estimating deviation:", error);
+            res.status(500).json({ message: "ERR estimating deviation", error: error.message });
         }
     }
 };

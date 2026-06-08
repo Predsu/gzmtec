@@ -39,7 +39,7 @@ const tripPlannerController = {
 
         if (!fromLat || !fromLon || !toLat || !toLon || !date || !time) {
             return res.status(400).json({ 
-                message: "Wszystkie parametry (fromLat, fromLon, toLat, toLon, date, time) są wymagane." 
+                message: "(fromLat, fromLon, toLat, toLon, date, time) are required." 
             });
         }
 
@@ -64,14 +64,14 @@ const tripPlannerController = {
             });
 
             if (otpResponse.data.errors) {
-                console.error("Błędy walidacji schematu GraphQL:", otpResponse.data.errors);
-                return res.status(400).json({ message: "Błąd zapytania do silnika OTP2", errors: otpResponse.data.errors });
+                console.error("GraphQL validation ERR:", otpResponse.data.errors);
+                return res.status(400).json({ message: "OTP2 query ERR: ", errors: otpResponse.data.errors });
             }
 
             const itineraries = otpResponse.data?.data?.plan?.itineraries;
 
             if (!itineraries || itineraries.length === 0) {
-                return res.status(404).json({ message: "Nie znaleziono połączeń dla podanych kryteriów." });
+                return res.status(404).json({ message: "no connections found for this input" });
             }
 
             const itinerary = itineraries[0];
@@ -79,52 +79,74 @@ const tripPlannerController = {
             for (let leg of itinerary.legs) {
                 if (leg.mode === 'BUS' || leg.mode === 'TRAM') {
                     
-                    const lineLabel = leg.route?.shortName;
-                    const fullStopId = leg.from.stop?.gtfsId || "";
-                    
-                    const stopId = fullStopId.includes(':') ? fullStopId.split(':')[1] : fullStopId;
-                    
-                    const timestamp = Math.floor(leg.startTime / 1000);
-                    
-                    const weekday = new Date(leg.startTime).toLocaleDateString('en-US', { weekday: 'long' });
-                    
-                    const tolerance = 3600;
-
-                    let predictedDeviation = 0;
-                    let samplesCount = 0;
-
                     try {
-                        const samplesList = await deviationOperationsModel.getAvgDeviationByLineStopTime(
-                            lineLabel, 
-                            stopId, 
-                            timestamp, 
-                            tolerance, 
-                            weekday
-                        );
+                        const lineLabel = leg.route?.shortName; 
+                        const fullStopId = leg.from.stop?.gtfsId || ""; 
+                        const stopId = fullStopId.includes(':') ? fullStopId.split(':')[1] : fullStopId; 
+                        
+                        if (!leg.startTime) continue; 
 
-                        samplesCount = samplesList.length;
+                        const dateInPoland = new Date(Number(leg.startTime));
+                        const weekday = dateInPoland.toLocaleDateString('en-US', { 
+                            weekday: 'long', 
+                            timeZone: 'Europe/Warsaw' 
+                        });
 
-                        if (samplesCount > 0) {
-                            const logSum = samplesList.reduce((sum, row) => sum + Math.log(row.deviation + 1), 0);
-                            const logAverage = logSum / samplesCount;
-                            predictedDeviation = Math.round(Math.exp(logAverage) - 1);
+                        const hours = dateInPoland.getHours();
+                        const minutes = dateInPoland.getMinutes();
+                        const seconds = dateInPoland.getSeconds();
+                        const secondsSinceMidnight = (hours * 3600) + (minutes * 60) + seconds;
+
+                        const tolerance = 3600; 
+                        let predictedDeviation = 0;
+                        let samplesCount = 0;
+
+                        console.log(`\n=== Processing data for ${lineLabel} ===`);
+                        console.log(`entry data: weekday = ${weekday}, secondsSinceMidnight = ${secondsSinceMidnight}, stopId = ${stopId}`);
+
+                        try {
+                            console.log(`sent query to db`);
+                            
+                            const samplesList = await deviationOperationsModel.getAvgDeviationByLineStopTime(
+                                lineLabel, 
+                                stopId, 
+                                secondsSinceMidnight, 
+                                tolerance, 
+                                weekday
+                            );
+
+                            console.log(`db responded with samples:`, samplesList ? samplesList.length : 0);
+
+                            samplesCount = samplesList ? samplesList.length : 0;
+
+                            if (samplesCount > 0) {
+                                const logSum = samplesList.reduce((sum, row) => sum + Math.log(row.deviation + 1), 0);
+                                const logAverage = logSum / samplesCount;
+                                predictedDeviation = Math.round(Math.exp(logAverage) - 1);
+                                console.log(`counted estimated deviation: ${predictedDeviation}`);
+                            }
+                        } catch (dbError) {
+                            console.error("TripPlanner ERR: ", dbError.message);
                         }
-                    } catch (dbError) {
-                        console.error(`Błąd bazy danych dla linii ${lineLabel} (przystanek: ${stopId}):`, dbError.message);
-                    }
 
-                    leg.predictedDeviationSeconds = predictedDeviation;
-                    leg.predictedSamplesCount = samplesCount;
-                    leg.expectedStartTime = leg.startTime + (predictedDeviation * 1000);
+                        leg.predictedDeviationSeconds = predictedDeviation;
+                        leg.predictedSamplesCount = samplesCount;
+                        leg.expectedStartTime = leg.startTime + (predictedDeviation * 1000);
+                        
+                        console.log(`=== finished for ${lineLabel} ===\n`);
+
+                    } catch (innerError) {
+                        console.error("TripPlanner ERR: ", innerError.message);
+                    }
                 }
             }
 
             res.status(200).json(itinerary);
 
         } catch (error) {
-            console.error("Błąd krytyczny TripPlanner:", error.response?.data || error.message);
+            console.error("TripPlanner ERR: ", error.response?.data || error.message);
             res.status(500).json({ 
-                message: "Błąd komunikacji z procesem OpenTripPlanner 2.", 
+                message: "OpenTripPlanner communication ERR: ", 
                 error: error.message 
             });
         }
