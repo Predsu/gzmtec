@@ -122,7 +122,8 @@ const tripPlannerController = {
                             if (samplesCount > 0) {
                                 const logSum = samplesList.reduce((sum, row) => sum + Math.log(row.deviation + 1), 0);
                                 const logAverage = logSum / samplesCount;
-                                predictedDeviation = Math.round(Math.exp(logAverage) - 1);
+                                // predictedDeviation = Math.round(Math.exp(logAverage) - 1);
+                                predictedDeviation = Math.ceil(logAverage);
                                 console.log(`counted estimated deviation: ${predictedDeviation} min`);
                             }
                         } catch (dbError) {

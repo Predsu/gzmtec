@@ -1,7 +1,16 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router'; // Importujemy ActivatedRoute do czytania URL
 import { TripPlannerService } from '../trip-planner-service';
-import { ChangeDetectorRef } from '@angular/core';
+
+export interface TripSearchParams {
+  fromLat: number;
+  fromLon: number;
+  toLat: number;
+  toLon: number;
+  date: string;
+  time: string;
+}
 
 export interface Leg {
   mode: 'WALK' | 'BUS' | 'TRAM';
@@ -23,39 +32,63 @@ export interface Itinerary {
 @Component({
   selector: 'app-trip-planner-displayer',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule], // Usunięto TripPlannerFormComponent z importów
   templateUrl: './trip-planner-displayer-component.html'
 })
 export class TripPlannerDisplayerComponent implements OnInit {
   private tripService = inject(TripPlannerService);
+  private route = inject(ActivatedRoute); // Wstrzykujemy ActivatedRoute
   private cdr = inject(ChangeDetectorRef);
 
   itinerary: Itinerary | null = null;
-  isLoading = true;
+  isLoading = false;
+  hasSearched = false;
   protected readonly Math = Math;
 
-  async ngOnInit() {
-    this.isLoading = true;
-    
-    const fromLat = 50.34377;
-    const fromLon = 18.91225;
-    const toLat = 50.27091;
-    const toLon = 18.99703;
-    const date = '2026-06-09'; 
-    const time = '14:50';
+  ngOnInit() {
+    // Nasłuchujemy parametrów z paska adresu URL
+    this.route.queryParams.subscribe(params => {
+      if (params['fromLat'] && params['fromLon'] && params['toLat'] && params['toLon']) {
+        
+        const searchParams: TripSearchParams = {
+          fromLat: Number(params['fromLat']),
+          fromLon: Number(params['fromLon']),
+          toLat: Number(params['toLat']),
+          toLon: Number(params['toLon']),
+          date: params['date'],
+          time: params['time']
+        };
 
-    const data = await this.tripService.getRoute(fromLat, fromLon, toLat, toLon, date, time);
-    
+        console.log('Wykryto parametry w URL, uruchamiam wyszukiwanie:', searchParams);
+        this.onSearchRoute(searchParams);
+      }
+    });
+  }
+
+  async onSearchRoute(params: TripSearchParams) {
+    this.isLoading = true;
+    this.hasSearched = true;
+    this.itinerary = null;
+    this.cdr.detectChanges();
+
+    const data = await this.tripService.getRoute(
+      params.fromLat,
+      params.fromLon,
+      params.toLat,
+      params.toLon,
+      params.date,
+      params.time
+    );
+
     if (data) {
       this.itinerary = data;
-      this.isLoading = false;
-      console.log('Loaded data:', this.itinerary);
-      
-      this.cdr.detectChanges(); 
+      console.log('Dane odebrane z backendu:', this.itinerary);
     } else {
-      this.isLoading = false;
-      this.cdr.detectChanges();
+      console.error('Brak odpowiedzi z serwisu lub wystąpił błąd.');
     }
+
+    this.isLoading = false;
+    this.cdr.detectChanges();
   }
 
   getModeBg(mode: string): string {

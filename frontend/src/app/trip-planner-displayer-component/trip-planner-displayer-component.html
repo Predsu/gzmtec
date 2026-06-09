@@ -1,4 +1,11 @@
-<div class="card border-0 shadow-sm mx-auto my-4 text-secondary bg-white" style="max-width: 550px;" *ngIf="itinerary">
+@if (isLoading) {
+  <div class="text-center my-4">
+    <div class="spinner-border text-dark spinner-border-sm" role="status"></div>
+    <span class="text-muted small ms-2">Odpytywanie OpenTripPlanner i szacowanie odchyleń GZM...</span>
+  </div>
+}
+
+<div class="card border-0 shadow-sm mx-auto my-4 text-secondary bg-white" style="max-width: 550px;" *ngIf="itinerary && !isLoading">
   
   <div class="card-header bg-transparent border-0 pt-4 px-4 pb-2">
     <div class="d-flex justify-content-between align-items-center">
@@ -122,3 +129,9 @@
     </div>
   </div>
 </div>
+
+@if (hasSearched && !itinerary && !isLoading) {
+  <div class="text-center my-4 text-muted small">
+    Nie znaleziono połączeń dla podanych parametrów lub serwer nie odpowiada.
+  </div>
+}
