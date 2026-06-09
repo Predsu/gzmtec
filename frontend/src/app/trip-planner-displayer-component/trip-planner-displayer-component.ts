@@ -23,6 +23,7 @@ export interface Leg {
   predictedDeviationMinutes?: number;
   predictedSamplesCount?: number;
   expectedStartTime?: number;
+  isLive?: boolean;
 }
 
 export interface Itinerary {

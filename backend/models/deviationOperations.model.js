@@ -13,21 +13,22 @@ const deviationOperationsModel = {
         
         const sql = `
             SELECT 
-                id, 
-                deviation, 
-                departure_seconds 
+                MAX(id) as id, 
+                MAX(deviation) as deviation, 
+                MIN(departure_seconds) as departure_seconds 
             FROM deviations 
             WHERE lineLabel = ? 
             AND stop_id = ? 
             AND departure_seconds BETWEEN ? AND ?
             AND weekday = ?
+            GROUP BY trip, vehicle_id
         `;
         
         const minTime = targetTime - Number(tolerance);
         const maxTime = targetTime + Number(tolerance);
 
         const [rows] = await db.query(sql, [lineLabel, stopId, minTime, maxTime, weekday]);
-        console.log(rows);
+        console.log(`[DB Aggregation] Pobrano ${rows.length} unikalnych kursów (po agregacji z duplikatów czasu).`);
         return rows; 
     }
 };

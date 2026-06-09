@@ -70,9 +70,17 @@
                       </span>
                       <span class="text-danger fw-bold d-block" style="font-size: 0.95rem;">
                         {{ leg.expectedStartTime | date:'HH:mm' }}
-                        <span class="d-block text-danger opacity-75" style="font-size: 0.7rem; font-weight: 500;">
-                          +{{ leg.predictedDeviationMinutes }} min prognozy
-                        </span>
+                        
+                        
+                        @if (leg.isLive) {
+                          <span class="d-inline-block badge bg-danger text-white animate-pulse" style="font-size: 0.65rem; font-weight: 600; padding: 2px 5px;">
+                            • LIVE GZM (+{{ leg.predictedDeviationMinutes }} min)
+                          </span>
+                        } @else {
+                          <span class="d-block text-danger opacity-75" style="font-size: 0.7rem; font-weight: 500;">
+                            +{{ leg.predictedDeviationMinutes }} min prognozy
+                          </span>
+                        }
                       </span>
                     } @else {
                       <span class="text-dark fw-bold d-block" style="font-size: 0.95rem;">
@@ -80,7 +88,7 @@
                       </span>
                       @if (leg.mode !== 'WALK') {
                         <span class="text-success d-block" style="font-size: 0.7rem; font-weight: 500;">
-                          Rozkładowo
+                          @if (leg.isLive) { O czasie (LIVE) } @else { Rozkładowo }
                         </span>
                       }
                     }
@@ -91,7 +99,7 @@
                   Kierunek: <span class="text-dark">{{ leg.to.name }}</span>
                 </div>
 
-                @if (leg.mode !== 'WALK' && leg.predictedSamplesCount !== undefined) {
+                @if (leg.mode !== 'WALK' && !leg.isLive && leg.predictedSamplesCount !== undefined) {
                   <div class="mt-2 pt-1 border-top border-light text-muted opacity-75" style="font-size: 0.75rem;">
                     @if (leg.predictedSamplesCount > 0) {
                       <span>Model oparty o <strong>{{ leg.predictedSamplesCount }}</strong> historycznych kursów.</span>
