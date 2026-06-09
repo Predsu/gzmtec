@@ -49,100 +49,65 @@ const tripPlannerController = {
             const otpResponse = await axios.post(otpEndpoint, {
                 query: OTP2_GTFS_GRAPHQL_QUERY,
                 variables: {
-                    fromLat: Number(fromLat),
-                    fromLon: Number(fromLon),
-                    toLat: Number(toLat),
-                    toLon: Number(toLon),
-                    date: date,
-                    time: time
-                }
-            }, {
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    fromLat: parseFloat(fromLat),
+                    fromLon: parseFloat(fromLon),
+                    toLat: parseFloat(toLat),
+                    toLon: parseFloat(toLon),
+                    date,
+                    time
                 }
             });
 
-            if (otpResponse.data.errors) {
-                console.error("GraphQL validation ERR:", otpResponse.data.errors);
-                return res.status(400).json({ message: "OTP2 query ERR: ", errors: otpResponse.data.errors });
-            }
+            const itineraries = otpResponse.data.data?.plan?.itineraries || [];
 
-            const itineraries = otpResponse.data?.data?.plan?.itineraries;
+            for (const itinerary of itineraries) {
+                if (!itinerary.legs) continue;
 
-            if (!itineraries || itineraries.length === 0) {
-                return res.status(404).json({ message: "no connections found for this input" });
-            }
-
-            const itinerary = JSON.parse(JSON.stringify(itineraries[0]));
-
-            for (let leg of itinerary.legs) {
-                if (leg.mode === 'BUS' || leg.mode === 'TRAM') {
-                    
+                for (const leg of itinerary.legs) {
                     try {
-                        const lineLabel = leg.route?.shortName; 
-                        const fullStopId = leg.from.stop?.gtfsId || ""; 
-                        const stopId = fullStopId.includes(':') ? fullStopId.split(':')[1] : fullStopId; 
-                        
-                        if (!leg.startTime) continue; 
+                        if (leg.mode === 'WALK') continue;
 
-                        const dateInPoland = new Date(Number(leg.startTime));
-                        const weekday = dateInPoland.toLocaleDateString('en-US', { 
-                            weekday: 'long', 
-                            timeZone: 'Europe/Warsaw' 
-                        });
-
-                        const hours = dateInPoland.getHours();
-                        const minutes = dateInPoland.getMinutes();
-                        const seconds = dateInPoland.getSeconds();
-                        const secondsSinceMidnight = (hours * 3600) + (minutes * 60) + seconds;
-
-                        const tolerance = 3600; 
+                        const lineLabel = leg.route?.shortName;
+                        const fullGtfsId = leg.from?.stop?.gtfsId;
                         let predictedDeviation = 0;
                         let samplesCount = 0;
 
-                        console.log(`\n=== Processing data for ${lineLabel} ===`);
-                        console.log(`entry data: weekday = ${weekday}, secondsSinceMidnight = ${secondsSinceMidnight}, stopId = ${stopId}`);
+                        if (lineLabel && fullGtfsId) {
+                            try {
+                                const stopId = fullGtfsId.split(':').pop();
+                                const startTimeDate = new Date(leg.startTime);
+                                const secondsSinceMidnight = (startTimeDate.getHours() * 3600) + (startTimeDate.getMinutes() * 60) + startTimeDate.getSeconds();
+                                const tolerance = 1800;
+                                const weekday = startTimeDate.toLocaleString('en-US', { weekday: 'long' });
 
-                        try {
-                            console.log(`sent query to db`);
-                            
-                            const samplesList = await deviationOperationsModel.getAvgDeviationByLineStopTime(
-                                lineLabel, 
-                                stopId, 
-                                secondsSinceMidnight, 
-                                tolerance, 
-                                weekday
-                            );
+                                console.log(`=== calculating for ${lineLabel} at stop ${stopId} ===`);
+                                const samplesList = await deviationOperationsModel.getAvgDeviationByLineStopTime(lineLabel, stopId, secondsSinceMidnight, tolerance, weekday);
+                                
+                                samplesCount = samplesList.length;
 
-                            console.log(`db responded with samples:`, samplesList ? samplesList.length : 0);
-
-                            samplesCount = samplesList ? samplesList.length : 0;
-
-                            if (samplesCount > 0) {
-                                const logSum = samplesList.reduce((sum, row) => sum + Math.log(row.deviation + 1), 0);
-                                const logAverage = logSum / samplesCount;
-                                // predictedDeviation = Math.round(Math.exp(logAverage) - 1);
-                                predictedDeviation = Math.ceil(logAverage);
-                                console.log(`counted estimated deviation: ${predictedDeviation} min`);
+                                if (samplesCount > 0) {
+                                    const logSum = samplesList.reduce((sum, row) => sum + Math.log(row.deviation + 1), 0);
+                                    const logAverage = logSum / samplesCount;
+                                    predictedDeviation = Math.ceil(logAverage);
+                                    console.log(`counted estimated deviation: ${predictedDeviation} min`);
+                                }
+                            } catch (dbError) {
+                                console.error("TripPlanner ERR: ", dbError.message);
                             }
-                        } catch (dbError) {
-                            console.error("TripPlanner ERR: ", dbError.message);
+
+                            leg.predictedDeviationMinutes = predictedDeviation;
+                            leg.predictedSamplesCount = samplesCount;
+                            leg.expectedStartTime = leg.startTime + (predictedDeviation * 60 * 1000);
+                            
+                            console.log(`=== finished for ${lineLabel} ===\n`);
                         }
-
-                        leg.predictedDeviationMinutes = predictedDeviation;
-                        leg.predictedSamplesCount = samplesCount;
-                        leg.expectedStartTime = leg.startTime + (predictedDeviation * 60 * 1000);
-                        
-                        console.log(`=== finished for ${lineLabel} ===\n`);
-
                     } catch (innerError) {
                         console.error("TripPlanner ERR: ", innerError.message);
                     }
                 }
             }
 
-            res.status(200).json(itinerary);
+            res.status(200).json(itineraries);
 
         } catch (error) {
             console.error("TripPlanner ERR: ", error.response?.data || error.message);

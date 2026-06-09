@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router'; // Importujemy ActivatedRoute do czytania URL
+import { ActivatedRoute } from '@angular/router';
 import { TripPlannerService } from '../trip-planner-service';
 
 export interface TripSearchParams {
@@ -32,21 +32,20 @@ export interface Itinerary {
 @Component({
   selector: 'app-trip-planner-displayer',
   standalone: true,
-  imports: [CommonModule], // Usunięto TripPlannerFormComponent z importów
+  imports: [CommonModule],
   templateUrl: './trip-planner-displayer-component.html'
 })
 export class TripPlannerDisplayerComponent implements OnInit {
   private tripService = inject(TripPlannerService);
-  private route = inject(ActivatedRoute); // Wstrzykujemy ActivatedRoute
+  private route = inject(ActivatedRoute); 
   private cdr = inject(ChangeDetectorRef);
 
-  itinerary: Itinerary | null = null;
+  itineraries: Itinerary[] = []; 
   isLoading = false;
   hasSearched = false;
   protected readonly Math = Math;
 
   ngOnInit() {
-    // Nasłuchujemy parametrów z paska adresu URL
     this.route.queryParams.subscribe(params => {
       if (params['fromLat'] && params['fromLon'] && params['toLat'] && params['toLon']) {
         
@@ -68,7 +67,7 @@ export class TripPlannerDisplayerComponent implements OnInit {
   async onSearchRoute(params: TripSearchParams) {
     this.isLoading = true;
     this.hasSearched = true;
-    this.itinerary = null;
+    this.itineraries = [];
     this.cdr.detectChanges();
 
     const data = await this.tripService.getRoute(
@@ -80,11 +79,12 @@ export class TripPlannerDisplayerComponent implements OnInit {
       params.time
     );
 
-    if (data) {
-      this.itinerary = data;
-      console.log('Dane odebrane z backendu:', this.itinerary);
+    if (data && Array.isArray(data)) {
+      this.itineraries = data;
+      console.log('Dane odebrane z backendu:', this.itineraries);
     } else {
-      console.error('Brak odpowiedzi z serwisu lub wystąpił błąd.');
+      this.itineraries = [];
+      console.error('Brak odpowiedzi z serwisu lub niepoprawny format danych.');
     }
 
     this.isLoading = false;
