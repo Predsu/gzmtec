@@ -28,7 +28,7 @@ const deviationOperationsModel = {
         const maxTime = targetTime + Number(tolerance);
 
         const [rows] = await db.query(sql, [lineLabel, stopId, minTime, maxTime, weekday]);
-        console.log(`[DB Aggregation] Pobrano ${rows.length} unikalnych kursów (po agregacji z duplikatów czasu).`);
+        console.log(`[DB Aggregation] ${rows.length} unique trips returned`);
         return rows; 
     }
 };

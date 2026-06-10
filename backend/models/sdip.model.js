@@ -1,3 +1,7 @@
+/**
+ * @deprecated
+ */
+
 const sdipService = require("../services/sdip.service");
 
 const vehicleTypes = {
