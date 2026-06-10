@@ -3,7 +3,7 @@
 ## Overview
 
 ![Version](https://img.shields.io/badge/Version-1.0.0-green)
-[![codecov](https://codecov.io/gh/TWÓJ_USER/TWOJE_REPO/branch/main/graph/badge.svg)](https://codecov.io/gh/Predsu/gzmtec)
+[![codecov](https://codecov.io/github/Predsu/gzmtec/branch/main/graph/badge.svg)](https://codecov.io/github/Predsu/gzmtec)
 ![Angular](https://img.shields.io/badge/Angular-21.2.15-blue?logo=angular)
 ![Node.js](https://img.shields.io/badge/Node.js-24.16.0-yellow?logo=node.js)
 
