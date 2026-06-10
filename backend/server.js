@@ -2,6 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
+dotenv.config({ path: path.resolve(__dirname, '.env') });
+const envValidator = require("./middleware/envValidator.middleware");
+
+envValidator();
 
 const app = express();
 
@@ -12,7 +16,6 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-dotenv.config({ path: path.resolve(__dirname, '.env') });
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
@@ -22,12 +25,8 @@ const deviationLoggerController = require('./controllers/deviationLogger.control
 const deviationOperationsController = require('./controllers/deviationOperations.controller');
 const tripPlannerController = require('./controllers/tripPlanner.controller');
 
-app.get('/deviations/estimate', deviationOperationsController.estimateDeviation);
-app.get('/trip/search', tripPlannerController.searchRoute);
-
-app.get('/api/status', (req, res) => {
-  res.json({ working: true, time: new Date().toISOString() });
-});
+const apiRouter = require('./routes/api/apiRouter');
+app.use('/api', apiRouter);
 
 app.listen(PORT, () => {
   console.log(`Main server is running on port ${PORT}`);

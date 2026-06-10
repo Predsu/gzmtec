@@ -24,6 +24,7 @@ describe('tripPlannerController - Integration Tests', () => {
         sinon.restore();
     });
 
+
     it('should return ERR 400 when not all parameters specified', async () => {
         const res = await request(app)
             .get('/api/search-route')
