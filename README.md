@@ -1,3 +1,5 @@
+# GZMTEC
+
 ## Overview
 
 ![Version](https://img.shields.io/badge/Version-1.0.0-green)
@@ -12,6 +14,12 @@ GZMTEC is Metropolia GZM dedicated, unofficial engine for planning trips with es
 The repository is splitted into two main catalogues:
 - `frontend` - provides Angular-driven website sending requests to the API and fetching them into UI, it is a minimal version to provide the most efficient and fastest user experience
 - `backend` - provides Node.js server developed in MVC model that runs the API (`server.js`) and archiving new deviations records to the database (`logger.js`). `.env` files has to but put there
+
+## Prerequisities
+
+- npm 11
+- Node.js 24
+- Angular 21
 
 ## Installation (DEV)
 
@@ -29,6 +37,8 @@ DB_USER = 'gzmtec_public'
 DB_PASSWORD = ''
 DB_DBNAME = 'gzmtec'
 DB_FRONTEND_URL = 'http://localhost:4200'
+JVM_HOST = 'gzmtec.duckdns.org'
+JVM_PORT = 8803
 ```
 3. Requests to the engine are available through URL: `localhost:4200/plan-trip`
 
