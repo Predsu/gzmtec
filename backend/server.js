@@ -26,7 +26,11 @@ const deviationOperationsController = require('./controllers/deviationOperations
 const tripPlannerController = require('./controllers/tripPlanner.controller');
 
 const apiRouter = require('./routes/api/apiRouter');
+const userRouter = require('./routes/users/userRouter')
+const authRouter = require('./routes/users/authRouter')
 app.use('/api', apiRouter);
+app.use('/user', userRouter);
+app.use('/auth', authRouter);
 
 app.listen(PORT, () => {
   console.log(`Main server is running on port ${PORT}`);

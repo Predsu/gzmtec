@@ -1,3 +1,35 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white">
+  <div class="container">
+    <a class="navbar-brand bg-white" href="/">
+      <img src="gzmteclogo.png" class="rounded float-start w-10" alt="Logo">
+    </a>
+
+    <button 
+      class="navbar-toggler" 
+      type="button" 
+      (click)="toggleNavbar()"
+      aria-controls="navbarSdCt" 
+      [aria-expanded]="!isMenuCollapsed" 
+      aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div 
+      class="collapse navbar-collapse" 
+      [class.show]="!isMenuCollapsed" 
+      id="navbarSdCt">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link active text-secondary" aria-current="page" href="/plan-trip">Trip Planner</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-secondary" href="/user-profile">User Profile</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
 @if (isLoading) {
   <div class="text-center my-4">
     <div class="spinner-border text-dark spinner-border-sm" role="status"></div>
@@ -24,19 +56,20 @@
       <div class="card-body px-4 pt-2 pb-4">
         <div class="position-relative container-fluid px-0">
           
-          @for (leg of itinerary.legs; track $index) {
-            <div class="d-flex position-relative" [class.mb-0]="$last">
+          @for (leg of itinerary.legs; track $index; let isLast = $last) {
+            <div class="d-flex position-relative" [class.mb-0]="isLast">
               
               <div class="d-flex flex-column align-items-center position-relative me-3">
                 <div class="rounded-circle border border-2 border-white shadow-sm" 
                      [ngClass]="leg.mode === 'WALK' ? 'bg-secondary' : leg.mode === 'BUS' ? 'bg-warning' : 'bg-danger'"
                      style="width: 14px; height: 14px; z-index: 2; margin-top: 5px;">
                 </div>
-                <div class="position-absolute h-100 border-start border-2 opacity-50"
-                     [ngClass]="leg.mode === 'WALK' ? 'border-secondary border-dashed' : leg.mode === 'BUS' ? 'border-warning' : 'border-danger'"
-                     style="left: 50%; transform: translateX(-50%); top: 12px; z-index: 1;"
-                     *ngIf="!$last">
-                </div>
+                @if (!isLast) {
+                  <div class="position-absolute h-100 border-start border-2 opacity-50"
+                       [ngClass]="leg.mode === 'WALK' ? 'border-secondary border-dashed' : leg.mode === 'BUS' ? 'border-warning' : 'border-danger'"
+                       style="left: 50%; transform: translateX(-50%); top: 12px; z-index: 1;">
+                  </div>
+                }
               </div>
 
               <div class="flex-grow-1 pb-4">
@@ -70,7 +103,6 @@
                       </span>
                       <span class="text-danger fw-bold d-block" style="font-size: 0.95rem;">
                         {{ leg.expectedStartTime | date:'HH:mm' }}
-                        
                         
                         @if (leg.isLive) {
                           <span class="d-inline-block badge bg-danger text-white animate-pulse" style="font-size: 0.65rem; font-weight: 600; padding: 2px 5px;">
