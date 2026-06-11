@@ -46,6 +46,37 @@ export class TripPlannerDisplayerComponent implements OnInit {
   toggleNavbar() {
     this.isMenuCollapsed = !this.isMenuCollapsed;
   }
+  // Przechowuje indeks aktualnie wyświetlanego wariantu
+currentItineraryIndex: number = 0;
+
+// Przechowuje nazwę aktualnej klasy animacji dla karty
+animationClass: string = 'animate__fadeIn';
+
+// Metoda do zmiany wariantu trasy z efektem przejścia przez bok
+changeItinerary(direction: 'prev' | 'next', total: number) {
+  if (direction === 'next') {
+    // Kierunek w prawo: stara karta ucieka w lewo, nowa wchodzi z prawej
+    this.animationClass = 'animate__fadeOutLeft';
+    this.cdr.detectChanges(); // Wymuszenie odświeżenia, aby odpalić fadeOut
+
+    setTimeout(() => {
+      this.currentItineraryIndex = (this.currentItineraryIndex + 1) % total;
+      this.animationClass = 'animate__slideInRight';
+      this.cdr.detectChanges();
+    }, 200); // Czas trwania fadeOut przed podmianą danych
+    
+  } else {
+    // Kierunek w lewo: stara karta ucieka w prawo, nowa wchodzi z lewej
+    this.animationClass = 'animate__fadeOutRight';
+    this.cdr.detectChanges();
+
+    setTimeout(() => {
+      this.currentItineraryIndex = (this.currentItineraryIndex - 1 + total) % total;
+      this.animationClass = 'animate__slideInLeft';
+      this.cdr.detectChanges();
+    }, 200);
+  }
+}
 
   itineraries: Itinerary[] = []; 
   isLoading = false;

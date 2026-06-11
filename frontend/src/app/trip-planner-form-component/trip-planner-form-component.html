@@ -14,92 +14,103 @@
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <div 
-      class="collapse navbar-collapse" 
-      [class.show]="!isMenuCollapsed" 
-      id="navbarSdCt">
+    <div class="collapse navbar-collapse" [class.show]="!isMenuCollapsed" id="navbarSdCt">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link active text-secondary" aria-current="page" href="/plan-trip">Trip Planner</a>
+          <a class="nav-link active text-secondary" aria-current="page" href="/plan-trip">Planer Trasy</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link text-secondary" href="/user-profile">User Profile</a>
+          <a class="nav-link text-secondary" href="/user-profile">Profil Użytkownika</a>
         </li>
       </ul>
     </div>
   </div>
 </nav>
 
-<div class="card border-0 shadow-sm mx-auto my-4 bg-white" style="max-width: 550px;">
-  <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
-    <h5 class="text-dark fw-bold mb-0">GZMTEC Trip Planner</h5>
-    <p class="text-muted small mb-0">Pick your entry and destination point and time of search.</p>
-  </div>
+<div class="container animate__animated animate__fadeIn">
+  <div class="card border-0 shadow-sm mx-auto my-4 bg-white rounded-3" style="max-width: 550px;">
+    <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
+      <div class="d-flex align-items-center mb-1">
+        <div class="text-warning fs-4 me-2"><i class="bi bi-geo-alt-fill"></i></div>
+        <h5 class="text-dark fw-bold mb-0">Planer Podróży GZMTEC</h5>
+      </div>
+      <p class="text-muted small mb-0">Wybierz przystanek początkowy, docelowy oraz czas, aby wyznaczyć trasę z predykcją opóźnień.</p>
+    </div>
 
-  <div class="card-body px-4 pt-3 pb-4">
-    <form [formGroup]="searchForm" (ngSubmit)="onSubmit()" autocomplete="off">
-      
-      <div class="mb-3 position-relative">
-        <label class="form-label text-uppercase text-muted fw-bold small" style="font-size: 0.75rem; letter-spacing: 0.5px;">
-          Starting Point (A)
-        </label>
-        <input type="text" class="form-control form-control-sm" placeholder="Enter the starting stop name..." formControlName="fromStopName"
-               [class.is-invalid]="searchForm.get('fromStopName')?.touched && (searchForm.get('fromStopName')?.invalid || !selectedFromStop)">
+    <div class="card-body px-4 pt-4 pb-4">
+      <form [formGroup]="searchForm" (ngSubmit)="onSubmit()" autocomplete="off">
         
-        @if (filteredFromStops.length > 0) {
-          <ul class="list-group position-absolute w-100 shadow bg-white" style="z-index: 1050; max-height: 220px; overflow-y: auto; margin-top: 2px;">
-            @for (stop of filteredFromStops; track stop.id) {
-              <button type="button" class="list-group-item list-group-item-action text-start py-2 px-3 small border-0" (click)="selectFromStop(stop)">
-                <strong class="text-dark">{{ stop.name }}</strong> 
-                <span class="text-muted text-uppercase ms-2" style="font-size: 0.7rem;">({{ stop.municipality }})</span>
-              </button>
-            }
-          </ul>
-        }
-      </div>
-
-      <div class="mb-3 position-relative">
-        <label class="form-label text-uppercase text-muted fw-bold small" style="font-size: 0.75rem; letter-spacing: 0.5px;">
-          Destination Point (B)
-        </label>
-        <input type="text" class="form-control form-control-sm" placeholder="Enter the destination stop name..." formControlName="toStopName"
-               [class.is-invalid]="searchForm.get('toStopName')?.touched && (searchForm.get('toStopName')?.invalid || !selectedToStop)">
-        
-        @if (filteredToStops.length > 0) {
-          <ul class="list-group position-absolute w-100 shadow bg-white" style="z-index: 1050; max-height: 220px; overflow-y: auto; margin-top: 2px;">
-            @for (stop of filteredToStops; track stop.id) {
-              <button type="button" class="list-group-item list-group-item-action text-start py-2 px-3 small border-0" (click)="selectToStop(stop)">
-                <strong class="text-dark">{{ stop.name }}</strong> 
-                <span class="text-muted text-uppercase ms-2" style="font-size: 0.7rem;">({{ stop.municipality }})</span>
-              </button>
-            }
-          </ul>
-        }
-      </div>
-
-      <div class="row g-2 mb-4">
-        <div class="col-7">
-          <label class="form-label text-uppercase text-muted fw-bold small" style="font-size: 0.75rem; letter-spacing: 0.5px;">Date</label>
-          <input type="date" class="form-control form-control-sm" formControlName="date"
-                 [class.is-invalid]="searchForm.get('date')?.touched && searchForm.get('date')?.invalid">
+        <div class="mb-4 position-relative">
+          <label class="form-label text-uppercase text-muted fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">
+            Miejsce startu (A)
+          </label>
+          <div class="input-group input-group-sm shadow-sm rounded">
+            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-circle-fill" style="font-size: 0.6rem; color: #6c757d;"></i></span>
+            <input type="text" class="form-control form-control-sm border-start-0" placeholder="Wpisz nazwę przystanku początkowego..." formControlName="fromStopName"
+                   [class.is-invalid]="searchForm.get('fromStopName')?.touched && (searchForm.get('fromStopName')?.invalid || !selectedFromStop)">
+          </div>
+          
+          @if (filteredFromStops.length > 0) {
+            <ul class="list-group position-absolute w-100 shadow-lg bg-white rounded border border-light" style="z-index: 1050; max-height: 220px; overflow-y: auto; margin-top: 4px;">
+              @for (stop of filteredFromStops; track stop.id) {
+                <button type="button" class="list-group-item list-group-item-action py-2 px-3 border-0 text-start small d-flex justify-content-between align-items-center" (click)="selectFromStop(stop)">
+                  <span class="fw-semibold text-dark">{{ stop.name }}</span>
+                  <span class="badge bg-secondary bg-opacity-10 text-secondary text-uppercase font-monospace" style="font-size: 0.65rem;">{{ stop.municipality }}</span>
+                </button>
+              }
+            </ul>
+          }
         </div>
-        <div class="col-5">
-          <label class="form-label text-uppercase text-muted fw-bold small" style="font-size: 0.75rem; letter-spacing: 0.5px;">Time</label>
-          <input type="time" class="form-control form-control-sm" formControlName="time"
-                 [class.is-invalid]="searchForm.get('time')?.touched && searchForm.get('time')?.invalid">
+
+        <div class="mb-4 position-relative">
+          <label class="form-label text-uppercase text-muted fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">
+            Miejsce docelowe (B)
+          </label>
+          <div class="input-group input-group-sm shadow-sm rounded">
+            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-geo-alt-fill" style="font-size: 0.8rem; color: #dc3545;"></i></span>
+            <input type="text" class="form-control form-control-sm border-start-0" placeholder="Wpisz nazwę przystanku końcowego..." formControlName="toStopName"
+                   [class.is-invalid]="searchForm.get('toStopName')?.touched && (searchForm.get('toStopName')?.invalid || !selectedToStop)">
+          </div>
+
+          @if (filteredToStops.length > 0) {
+            <ul class="list-group position-absolute w-100 shadow-lg bg-white rounded border border-light" style="z-index: 1050; max-height: 220px; overflow-y: auto; margin-top: 4px;">
+              @for (stop of filteredToStops; track stop.id) {
+                <button type="button" class="list-group-item list-group-item-action py-2 px-3 border-0 text-start small d-flex justify-content-between align-items-center" (click)="selectToStop(stop)">
+                  <span class="fw-semibold text-dark">{{ stop.name }}</span>
+                  <span class="badge bg-secondary bg-opacity-10 text-secondary text-uppercase font-monospace" style="font-size: 0.65rem;">{{ stop.municipality }}</span>
+                </button>
+              }
+            </ul>
+          }
         </div>
-      </div>
 
-      <button type="submit" class="btn btn-dark w-100 fw-bold py-2 shadow-sm" style="font-size: 0.9rem;" [disabled]="!selectedFromStop || !selectedToStop">
-        Find Connection
-      </button>
+        <div class="row g-3 mb-4">
+          <div class="col-7">
+            <label class="form-label text-uppercase text-muted fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Data wyjazdu</label>
+            <input type="date" class="form-control form-control-sm shadow-sm rounded" formControlName="date"
+                   [class.is-invalid]="searchForm.get('date')?.touched && searchForm.get('date')?.invalid">
+          </div>
+          <div class="col-5">
+            <label class="form-label text-uppercase text-muted fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Godzina</label>
+            <input type="time" class="form-control form-control-sm shadow-sm rounded" formControlName="time"
+                   [class.is-invalid]="searchForm.get('time')?.touched && searchForm.get('time')?.invalid">
+          </div>
+        </div>
 
-    </form>
+        <button type="submit" class="btn btn-dark w-100 fw-bold py-2 shadow-sm rounded-2 d-flex align-items-center justify-content-center" style="font-size: 0.95rem;" [disabled]="!selectedFromStop || !selectedToStop">
+          <i class="bi bi-search me-2" style="font-size: 0.85rem;"></i> Znajdź połączenie
+        </button>
 
-    @if (authService.currentUser() && selectedFromStop && selectedToStop) {
-      <button type="button" class="btn btn-link btn-sm text-decoration-none text-muted w-100 mt-2" (click)="saveAsFavorite()">
-        ⭐ Dodaj to połączenie do ulubionych tras w panelu
-      </button>
-    }
+      </form>
+
+      @if (authService.currentUser() && selectedFromStop && selectedToStop) {
+        <div class="mt-4 pt-3 border-top border-light text-center animate__animated animate__fadeIn">
+          <p class="text-muted small mb-2">Podoba Ci się ta trasa? Zapisz ją na stałe w swoim panelu.</p>
+          <button type="button" class="btn btn-outline-warning btn-sm fw-bold px-3 py-1.5 rounded-pill shadow-xs" (click)="saveAsFavorite()">
+            <i class="bi bi-star-fill me-1"></i> Dodaj do szybkich połączeń
+          </button>
+        </div>
+      }
+    </div>
   </div>
 </div>

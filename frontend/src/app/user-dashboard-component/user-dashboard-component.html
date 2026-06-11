@@ -14,103 +14,129 @@
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <div 
-      class="collapse navbar-collapse" 
-      [class.show]="!isMenuCollapsed" 
-      id="navbarSdCt">
+    <div class="collapse navbar-collapse" [class.show]="!isMenuCollapsed" id="navbarSdCt">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link active text-secondary" aria-current="page" href="/plan-trip">Trip Planner</a>
+          <a class="nav-link active text-secondary" aria-current="page" href="/plan-trip">Planer Trasy</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link text-secondary" href="/user-profile">User Profile</a>
+          <a class="nav-link text-secondary" href="/user-profile">Profil Użytkownika</a>
         </li>
       </ul>
     </div>
   </div>
 </nav>
 
-<div class="card border-0 shadow-sm mx-auto my-4 bg-white" style="max-width: 550px;">
-  
-  @if (authService.currentUser()) {
-    <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
-      <div>
-        <h5 class="text-dark fw-bold mb-0">Witaj, {{ authService.currentUser() }}!</h5>
-        <p class="text-muted small mb-0">Zarządzaj swoim panelem i ulubionymi połączeniami.</p>
+<div class="container animate__animated animate__fadeIn">
+  <div class="card border-0 shadow-sm mx-auto my-4 bg-white rounded-3" style="max-width: 550px;">
+    
+    @if (authService.currentUser()) {
+      <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+        <div>
+          <div class="d-flex align-items-center mb-1">
+            <div class="text-success fs-5 me-2"><i class="bi bi-person-check-fill"></i></div>
+            <h5 class="text-dark fw-bold mb-0">Witaj, {{ authService.currentUser() }}!</h5>
+          </div>
+          <p class="text-muted small mb-0">Zarządzaj swoim profilem i zapisanymi trasami.</p>
+        </div>
+        <button class="btn btn-outline-danger btn-sm fw-bold px-3 rounded-pill" (click)="onLogout()">Wyloguj</button>
       </div>
-      <button class="btn btn-outline-danger btn-sm" (click)="onLogout()">Wyloguj</button>
-    </div>
 
-    <div class="card-body px-4 pt-4 pb-4">
-      <h6 class="text-uppercase tracking-wider text-muted fw-bold mb-3" style="font-size: 0.75rem; letter-spacing: 0.5px;">
-        Twoje zapisane trasy szybkich połączeń
-      </h6>
-      
-      @if (favorites().length === 0) {
-  <p class="text-muted small my-3">Nie dodałeś jeszcze żadnej trasy do ulubionych.</p>
-} @else {
-  <div class="list-group shadow-sm border-0 rounded">
-    @for (fav of favorites(); track fav.id) {
-      <button type="button" class="list-group-item list-group-item-action py-3 px-3 border-bottom border-light text-start" 
-              (click)="applyRoute(fav)">
-        <div class="d-flex justify-content-between align-items-center">
-          <strong class="text-dark">⭐ {{ fav.route_name }}</strong>
-          <span class="badge bg-dark text-white rounded-pill px-2 py-1" style="font-size: 0.7rem;">Załaduj w planerze</span>
-        </div>
-        <div class="text-muted small mt-1" style="font-size: 0.8rem;">
-          {{ fav.from_stop_name }} <i class="bi bi-arrow-right mx-1"></i> {{ fav.to_stop_name }}
-        </div>
-      </button>
-    }
-  </div>
-}
-    </div>
-  }
-
-  @else {
-    <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
-      <h5 class="text-dark fw-bold mb-0">{{ isLoginMode ? 'Logowanie pasażera' : 'Rejestracja w systemie GZM' }}</h5>
-      <p class="text-muted small mb-0">Zaloguj się, aby mieć szybki dostęp do swoich stałych tras.</p>
-    </div>
-
-    <div class="card-body px-4 pt-3 pb-4">
-      <form [formGroup]="authForm" (ngSubmit)="onSubmitAuth()" autocomplete="off">
+      <div class="card-body px-4 pt-4 pb-4">
+        <h6 class="text-uppercase tracking-wider text-muted fw-bold mb-3" style="font-size: 0.72rem; letter-spacing: 0.5px;">
+          <i class="bi bi-star-fill text-warning me-1"></i> Twoje ulubione relacje przesiadkowe
+        </h6>
         
-        @if (errorMessage) {
-          <div class="alert alert-danger py-2 px-3 small border-0 mb-3">{{ errorMessage }}</div>
-        }
-
-        @if (!isLoginMode) {
-          <div class="mb-3">
-            <label class="form-label text-uppercase text-muted fw-bold small" style="font-size: 0.75rem;">Nazwa użytkownika</label>
-            <input type="text" class="form-control form-control-sm" placeholder="Wpisz swój nick..." formControlName="username">
+        @if (favorites().length === 0) {
+          <div class="p-4 bg-light bg-opacity-50 text-center rounded border border-dashed my-3">
+            <div class="fs-2 text-muted opacity-50 mb-1"><i class="bi bi-bookmark-dash"></i></div>
+            <p class="text-muted small mb-0">Nie dodałeś jeszcze żadnej trasy do ulubionych.</p>
+            <p class="text-muted-light small text-center" style="font-size: 0.75rem; color: #adb5bd;">Zrobisz to z poziomu formularza wyszukiwania połączenia.</p>
+          </div>
+        } @else {
+          <div class="list-group shadow-xs border-0 rounded-3 overflow-hidden border my-3">
+            @for (fav of favorites(); track fav.id) {
+              <button type="button" class="list-group-item list-group-item-action py-3 px-3 border-bottom border-light text-start d-flex justify-content-between align-items-center transition-transform" (click)="applyRoute(fav)">
+                <div class="me-2">
+                  <div class="fw-bold text-dark d-flex align-items-center mb-1" style="font-size: 0.92rem;">
+                    <i class="bi bi-signpost-2 text-secondary me-2"></i> {{ fav.route_name || 'Połączenie bez nazwy' }}
+                  </div>
+                  <div class="text-muted small d-flex align-items-center flex-wrap" style="font-size: 0.8rem;">
+                    <span class="text-dark fw-medium">{{ fav.from_stop_name }}</span> 
+                    <i class="bi bi-arrow-right mx-2 text-warning fw-bold"></i> 
+                    <span class="text-dark fw-medium">{{ fav.to_stop_name }}</span>
+                  </div>
+                </div>
+                <div class="text-end">
+                  <span class="badge bg-warning text-dark fw-bold px-2.5 py-1.5 rounded-pill shadow-xs" style="font-size: 0.7rem;">
+                    Załaduj <i class="bi bi-chevron-right ms-0.5"></i>
+                  </span>
+                </div>
+              </button>
+            }
           </div>
         }
+      </div>
+    }
 
-        <div class="mb-3">
-          <label class="form-label text-uppercase text-muted fw-bold small" style="font-size: 0.75rem;">Adres E-mail</label>
-          <input type="email" class="form-control form-control-sm" placeholder="nazwa@domena.pl" formControlName="email"
-                 [class.is-invalid]="authForm.get('email')?.touched && authForm.get('email')?.invalid">
-        </div>
+    @if (!authService.currentUser()) {
+      <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0 text-center">
+        <div class="display-6 text-dark mb-2"><i class="bi bi-shield-lock-fill"></i></div>
+        <h5 class="text-dark fw-bold mb-1">{{ isLoginMode ? 'Logowanie pasażera' : 'Rejestracja w GZMTEC' }}</h5>
+        <p class="text-muted small mb-0">Zaloguj się, aby zyskać dostęp do chmury ulubionych połączeń przesiadkowych.</p>
+      </div>
 
-        <div class="mb-3">
-          <label class="form-label text-uppercase text-muted fw-bold small" style="font-size: 0.75rem;">Hasło</label>
-          <input type="password" class="form-control form-control-sm" placeholder="••••••••" formControlName="password"
-                 [class.is-invalid]="authForm.get('password')?.touched && authForm.get('password')?.invalid">
-        </div>
+      <div class="card-body px-4 pt-4 pb-4">
+        <form [formGroup]="authForm" (ngSubmit)="onSubmitAuth()" autocomplete="off">
+          
+          @if (errorMessage) {
+            <div class="alert alert-danger py-2.5 px-3 border-0 rounded small mb-4 animate__animated animate__headShake d-flex align-items-center shadow-xs">
+              <i class="bi bi-exclamation-circle-fill me-2 fs-5"></i>
+              <div class="fw-semibold">{{ errorMessage }}</div>
+            </div>
+          }
 
-        <button type="submit" class="btn btn-dark w-100 fw-bold py-2 shadow-sm mb-3" [disabled]="authForm.invalid">
-          {{ isLoginMode ? 'Zaloguj się' : 'Utwórz konto' }}
-        </button>
+          @if (!isLoginMode) {
+            <div class="mb-3 animate__animated animate__fadeInDown">
+              <label class="form-label text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Nazwa użytkownika</label>
+              <div class="input-group input-group-sm rounded shadow-sm">
+                <span class="input-group-text bg-light text-muted"><i class="bi bi-person"></i></span>
+                <input type="text" class="form-control" placeholder="Wpisz swój unikalny nick..." formControlName="username">
+              </div>
+            </div>
+          }
 
-        <div class="text-center">
-          <button type="button" class="btn btn-link btn-sm text-decoration-none text-secondary" (click)="toggleMode()">
-            {{ isLoginMode ? 'Nie masz konta? Zarejestruj się' : 'Masz już konto? Zaloguj się' }}
+          <div class="mb-3">
+            <label class="form-label text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Adres E-mail</label>
+            <div class="input-group input-group-sm rounded shadow-sm">
+              <span class="input-group-text bg-light text-muted"><i class="bi bi-envelope"></i></span>
+              <input type="email" class="form-control" placeholder="nazwa@domena.pl" formControlName="email"
+                     [class.is-invalid]="authForm.get('email')?.touched && authForm.get('email')?.invalid">
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Hasło zabezpieczające</label>
+            <div class="input-group input-group-sm rounded shadow-sm">
+              <span class="input-group-text bg-light text-muted"><i class="bi bi-key"></i></span>
+              <input type="password" class="form-control" placeholder="••••••••" formControlName="password"
+                     [class.is-invalid]="authForm.get('password')?.touched && authForm.get('password')?.invalid">
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-dark w-100 fw-bold py-2 shadow-sm mb-3 rounded-2" style="font-size: 0.95rem;" [disabled]="authForm.invalid">
+            {{ isLoginMode ? 'Zaloguj się do systemu' : 'Utwórz konto pasażera' }}
           </button>
-        </div>
 
-      </form>
-    </div>
-  }
+          <div class="text-center pt-2">
+            <button type="button" class="btn btn-link btn-sm text-decoration-none text-secondary fw-semibold" (click)="toggleMode()">
+              {{ isLoginMode ? 'Nie masz konta? Zarejestruj się teraz' : 'Masz już konto? Przejdź do logowania' }}
+            </button>
+          </div>
 
+        </form>
+      </div>
+    }
+
+  </div>
 </div>
