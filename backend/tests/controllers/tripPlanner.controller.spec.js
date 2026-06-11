@@ -24,7 +24,6 @@ describe('tripPlannerController - Integration Tests', () => {
         sinon.restore();
     });
 
-
     it('should return ERR 400 when not all parameters specified', async () => {
         const res = await request(app)
             .get('/api/search-route')
@@ -45,7 +44,7 @@ describe('tripPlannerController - Integration Tests', () => {
                                 duration: 600,
                                 startTime: 1770462000000,
                                 route: { shortName: 'M3' },
-                                from: { name: 'Bytom Dworzec', stop: { gtfsId: '1234' } },
+                                from: { name: 'Bytom Dworzec', stop: { gtfsId: 'GZM:1234' } },
                                 to: { name: 'Katowice Rynek' }
                             }]
                         }]
@@ -74,15 +73,61 @@ describe('tripPlannerController - Integration Tests', () => {
 
         expect(res.status).to.equal(200);
         expect(res.body).to.be.an('array');
+        expect(res.body.length).to.equal(1);
 
         const itinerary = res.body[0];
-        expect(itinerary).to.be.an('object');
         expect(itinerary.legs).to.be.an('array');
 
         const testedLeg = itinerary.legs[0];
         expect(testedLeg.route.shortName).to.equal('M3');
+        
+        expect(testedLeg.predictedDeviationMinutes).to.equal(2);
         expect(testedLeg.predictedSamplesCount).to.equal(2);
-        expect(testedLeg.predictedDeviationMinutes).to.be.a('number');
-        expect(testedLeg.expectedStartTime).to.exist;
+        expect(testedLeg.expectedStartTime).to.equal(testedLeg.startTime + (2 * 60 * 1000));
+        
+        expect(dbQueryStub.calledOnce).to.be.true;
+        const dbArgs = dbQueryStub.firstCall.args;
+        expect(dbArgs[0]).to.equal('M3');
+        expect(dbArgs[1]).to.equal('1234');
+    });
+
+    it('should fall back gracefully and return route when database throws an error', async () => {
+        const fakeOtpResponse = {
+            data: {
+                data: {
+                    plan: {
+                        itineraries: [{
+                            legs: [{
+                                mode: 'TRAM',
+                                duration: 300,
+                                startTime: 1770462000000,
+                                route: { shortName: '6' },
+                                from: { name: 'Bytom Plac Sikorskiego', stop: { gtfsId: 'GZM:5678' } },
+                                to: { name: 'Chorzów Rynek' }
+                            }]
+                        }]
+                    }
+                }
+            }
+        };
+        axiosPostStub.resolves(fakeOtpResponse);
+        
+        dbQueryStub.rejects(new Error('Database connection timeout'));
+
+        const res = await request(app)
+            .get('/api/search-route')
+            .query({
+                fromLat: 50.34,
+                fromLon: 18.91,
+                toLat: 50.27,
+                toLon: 18.99,
+                date: '2026-06-09',
+                time: '14:00'
+            });
+
+        expect(res.status).to.equal(200);
+        const leg = res.body[0].legs[0];
+        expect(leg.predictedDeviationMinutes).to.equal(0);
+        expect(leg.predictedSamplesCount).to.equal(0);
     });
 });
