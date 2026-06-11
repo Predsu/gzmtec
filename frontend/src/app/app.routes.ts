@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { BackendStatusComponent } from './backend-status-component/backend-status-component';
 import { TripPlannerDisplayerComponent } from './trip-planner-displayer-component/trip-planner-displayer-component';
 import { TripPlannerFormComponent } from './trip-planner-form-component/trip-planner-form-component';
+import { UserDashboardComponent } from './user-dashboard-component/user-dashboard-component';
 
 export const routes: Routes = [
     {
@@ -15,5 +16,9 @@ export const routes: Routes = [
     {
         path: 'plan-trip',
         component: TripPlannerFormComponent
+    },
+    {
+        path: 'user-profile',
+        component: UserDashboardComponent
     }
 ];

@@ -41,6 +41,12 @@ export class TripPlannerDisplayerComponent implements OnInit {
   private route = inject(ActivatedRoute); 
   private cdr = inject(ChangeDetectorRef);
 
+  isMenuCollapsed = true;
+
+  toggleNavbar() {
+    this.isMenuCollapsed = !this.isMenuCollapsed;
+  }
+
   itineraries: Itinerary[] = []; 
   isLoading = false;
   hasSearched = false;
