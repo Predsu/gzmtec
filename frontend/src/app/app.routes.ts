@@ -3,6 +3,7 @@ import { BackendStatusComponent } from './backend-status-component/backend-statu
 import { TripPlannerDisplayerComponent } from './trip-planner-displayer-component/trip-planner-displayer-component';
 import { TripPlannerFormComponent } from './trip-planner-form-component/trip-planner-form-component';
 import { UserDashboardComponent } from './user-dashboard-component/user-dashboard-component';
+import { HomeComponent } from './home-component/home-component';
 
 export const routes: Routes = [
     {
@@ -20,5 +21,9 @@ export const routes: Routes = [
     {
         path: 'user-profile',
         component: UserDashboardComponent
+    },
+    {
+        path: '',
+        component: HomeComponent
     }
 ];

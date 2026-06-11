@@ -1,0 +1,146 @@
+<div class="bg-dark text-white py-5 mb-5 position-relative overflow-hidden" style="min-height: 450px; display: flex; align-items: center;">
+  <div class="position-absolute w-100 h-100 opacity-25" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 20px 20px; top:0; left:0;"></div>
+  
+  <div class="container position-relative z-1">
+    <div class="row align-items-center">
+      <div class="col-lg-7 animate__animated animate__fadeInLeft">
+        <span class="badge bg-warning text-dark mb-3 fw-bold px-3 py-2 text-uppercase tracking-wider" style="font-size: 0.8rem;">Projekt Systemu Monitoringu Metropolii</span>
+        <h1 class="display-4 fw-bold mb-3">Inteligentne Planowanie Podróży w GZM</h1>
+        <p class="lead text-muted-light mb-4" style="color: #adb5bd; font-size: 1.25rem;">
+          GZMTEC łączy tradycyjne wyszukiwanie połączeń przesiadkowych z zaawansowaną analizą historycznych odchyleń i opóźnień autobusów oraz tramwajów w czasie rzeczywistym.
+        </p>
+        <div class="d-flex gap-3">
+          <a href="/plan-trip" class="btn btn-warning btn-lg fw-bold px-4 py-3 shadow-sm transition-transform">
+            <i class="bi bi-route animate__animated animate__pulse animate__infinite d-inline-block"></i> Otwórz Planer
+          </a>
+          <a href="/user-profile" class="btn btn-outline-light btn-lg px-4 py-3">
+            Konto Pasażera
+          </a>
+        </div>
+      </div>
+      <div class="col-lg-5 d-none d-lg-block text-center animate__animated animate__fadeInRight">
+        <div class="display-1 text-warning mb-2"><i class="bi bi-cpu-fill"></i></div>
+        <div class="bg-secondary bg-opacity-25 p-4 rounded-3 border border-secondary shadow">
+          <code class="text-warning small text-start d-block">
+            [GZMTEC_LOG] Analiza kursu M3/108...<br>
+            [DANE] Pobrano 42 historyczne próbki.<br>
+            [PREDYKCJA] Średnie odchylenie: +4 min.<br>
+            [STATUS] Skorygowano przesiadkę na stan LIVE.
+          </code>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container my-5">
+  <div class="text-center mb-5 animate__animated animate__fadeIn">
+    <h2 class="fw-bold text-dark">Co potrafi GZMTEC?</h2>
+    <p class="text-muted">Trzy kluczowe segmenty systemu stworzone z myślą o pasażerach aglomeracji.</p>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-md-4 animate__animated animate__fadeInUp animate__delay-0.7s">
+      <div class="card h-100 border-0 shadow-sm p-4 text-center card-hover-effect">
+        <div class="ln-icon text-primary display-4 mb-3"><i class="bi bi-compass"></i></div>
+        <h4 class="fw-bold text-dark mb-2">Planer Podróży</h4>
+        <p class="text-muted small">
+          Wyszukiwarka tras oparta na silniku OpenTripPlanner 2. Wyznacza optymalne ścieżki i czasy przesiadek pomiędzy miastami Metropolii.
+        </p>
+        <a href="/plan-trip" class="mt-auto text-decoration-none fw-bold text-primary small">Przejdź do planera &rarr;</a>
+      </div>
+    </div>
+
+    <div class="col-md-4 animate__animated animate__fadeInUp animate__delay-0.7s" style="animation-delay: 0.1s;">
+      <div class="card h-100 border-0 shadow-sm p-4 text-center card-hover-effect">
+        <div class="ln-icon text-warning display-4 mb-3"><i class="bi bi-graph-up-arrow"></i></div>
+        <h4 class="fw-bold text-dark mb-2">Predykcja Odchyleń</h4>
+        <p class="text-muted small">
+          Nasz algorytm sprawdza bazę danych z archiwalnymi przejazdami i oblicza logarytmiczną średnią opóźnień dla konkretnej linii na wybranym przystanku.
+        </p>
+        <a href="/backend-status" class="mt-auto text-decoration-none fw-bold text-warning small">Status bazy &rarr;</a>
+      </div>
+    </div>
+
+    <div class="col-md-4 animate__animated animate__fadeInUp animate__delay-0.7s" style="animation-delay: 0.2s;">
+      <div class="card h-100 border-0 shadow-sm p-4 text-center card-hover-effect">
+        <div class="ln-icon text-success display-4 mb-3"><i class="bi bi-bookmark-star"></i></div>
+        <h4 class="fw-bold text-dark mb-2">Szybkie Połączenia</h4>
+        <p class="text-muted small">
+          Zaloguj się na swoje konto pasażera GZM, aby zapisywać najczęstsze trasy (np. dom-szkoła, praca). Załadujesz je jednym kliknięciem.
+        </p>
+        <a href="/user-profile" class="mt-auto text-decoration-none fw-bold text-success small">Mój profil &rarr;</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bg-light py-5 my-5 border-top border-bottom">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <img src="m1bus.jpg" class="img-fluid rounded-3 shadow animate__animated animate__fadeIn" alt="Autobus GZM">
+      </div>
+      <div class="col-lg-6">
+        <h3 class="fw-bold text-dark mb-4">Dlaczego predykcja zamiast zwykłego rozkładu?</h3>
+        
+        <div class="d-flex mb-4">
+          <div class="me-3 fs-3 text-dark"><i class="bi bi-1-circle-fill"></i></div>
+          <div>
+            <h5 class="fw-bold mb-1">Agregacja danych SDIP</h5>
+            <p class="text-muted small">System stale rejestruje rzeczywiste czasy odjazdów pojazdów z oficjalnych API Transport GZM i buduje lokalną bazę zachowań komunikacyjnych.</p>
+          </div>
+        </div>
+
+        <div class="d-flex mb-4">
+          <div class="me-3 fs-3 text-dark"><i class="bi bi-2-circle-fill"></i></div>
+          <div>
+            <h5 class="fw-bold mb-1">Logarytmiczne wygładzanie próbki</h5>
+            <p class="text-muted small">Zamiast prostej średniej matematycznej, która jest podatna na anomalie (np. wypadek raz w roku), stosujemy tłumienie odchyleń, dające realny podgląd sytuacji.</p>
+          </div>
+        </div>
+
+        <div class="d-flex">
+          <div class="me-3 fs-3 text-dark"><i class="bi bi-3-circle-fill"></i></div>
+          <div>
+            <h5 class="fw-bold mb-1">Weryfikacja przesiadek LIVE</h5>
+            <p class="text-muted small">Planer ostrzega Cię przed zbyt krótkim czasem na zmianę linii, automatycznie przesuwając oczekiwany czas startu kolejnego etapu drogi.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="bg-white pt-5 pb-4 border-top">
+  <div class="container">
+    <div class="row g-4 justify-content-between">
+      <div class="col-md-4">
+        <h5 class="fw-bold text-dark mb-3">GZMTEC</h5>
+        <p class="text-muted small">Projekt integrujący system planowania tras z analizą matematyczną punktualności w Górnośląsko-Zagłębiowskiej Metropolii.</p>
+        <span class="badge bg-success bg-opacity-10 text-success rounded-pill border border-success border-opacity-25">Wersja 1.0.0</span>
+      </div>
+      <div class="col-md-3">
+        <h6 class="text-uppercase fw-bold text-muted small mb-3">Skróty nawigacyjne</h6>
+        <ul class="list-unstyled">
+          <li class="mb-2"><a href="/plan-trip" class="text-decoration-none text-secondary small-link"><i class="bi bi-chevron-right me-1"></i> Planer Podróży</a></li>
+          <li class="mb-2"><a href="/user-profile" class="text-decoration-none text-secondary small-link"><i class="bi bi-chevron-right me-1"></i> Panel i Ulubione</a></li>
+          <li class="mb-2"><a href="/backend-status" class="text-decoration-none text-secondary small-link"><i class="bi bi-chevron-right me-1"></i> Monitor Statusu API</a></li>
+        </ul>
+      </div>
+      <div class="col-md-3">
+        <h6 class="text-uppercase fw-bold text-muted small mb-3">Zasoby zewnętrzne</h6>
+        <ul class="list-unstyled">
+          <li class="mb-2"><a href="https://sdip.transportgzm.pl" target="_blank" class="text-decoration-none text-secondary small-link"><i class="bi bi-box-arrow-up-right me-1"></i> Oficjalny SDIP GZM</a></li>
+          <li class="mb-2"><a href="https://www.opentripplanner.org" target="_blank" class="text-decoration-none text-secondary small-link"><i class="bi bi-box-arrow-up-right me-1"></i> OpenTripPlanner Docs</a></li>
+        </ul>
+      </div>
+    </div>
+    <hr class="my-4 text-muted opacity-25">
+    <div class="text-center text-muted small">
+      <img src="https://i0.wp.com/opensource.org/wp-content/uploads/2009/08/osi_black_and_white_light_backgrounds_logo_0.png?w=1500&quality=80&ssl=1" 
+       alt="Open Source Logo" 
+       style="height: 1em; vertical-align: middle;"> 2026 GZMTEC by ToriYukari
+    </div>
+  </div>
+</footer>

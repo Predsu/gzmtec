@@ -14,170 +14,199 @@
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <div 
-      class="collapse navbar-collapse" 
-      [class.show]="!isMenuCollapsed" 
-      id="navbarSdCt">
+    <div class="collapse navbar-collapse" [class.show]="!isMenuCollapsed" id="navbarSdCt">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link active text-secondary" aria-current="page" href="/plan-trip">Trip Planner</a>
+          <a class="nav-link active text-secondary" aria-current="page" href="/plan-trip">Planer Trasy</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link text-secondary" href="/user-profile">User Profile</a>
+          <a class="nav-link text-secondary" href="/user-profile">Profil Użytkownika</a>
         </li>
       </ul>
     </div>
   </div>
 </nav>
 
-@if (isLoading) {
-  <div class="text-center my-4">
-    <div class="spinner-border text-dark spinner-border-sm" role="status"></div>
-    <span class="text-muted small ms-2">Odpytywanie OpenTripPlanner i szacowanie odchyleń GZM...</span>
-  </div>
-}
+<div class="container pb-5 animate__animated animate__fadeIn">
+  
+  @if (isLoading) {
+    <div class="text-center my-5 py-4">
+      <div class="spinner-border text-warning mb-3 shadow-sm" role="status" style="width: 2.5rem; height: 2.5rem; border-width: 0.25em;"></div>
+      <h6 class="text-dark fw-bold mb-1">Przetwarzanie zapytania...</h6>
+      <p class="text-muted small">Odpytujemy OpenTripPlanner i analizujemy odchylenia w bazie danych SDIP GZM.</p>
+    </div>
+  }
 
-@if (!isLoading && itineraries.length > 0) {
-  @for (itinerary of itineraries; track $index) {
-    
-    <div class="card border-0 shadow-sm mx-auto my-4 text-secondary bg-white" style="max-width: 550px;">
+  @if (!isLoading && itineraries.length > 0) {
+    <div class="mx-auto" style="max-width: 550px; width: 100%;"> 
       
-      <div class="card-header bg-transparent border-0 pt-4 px-4 pb-2">
-        <div class="d-flex justify-content-between align-items-center">
-          <h6 class="text-uppercase tracking-wider text-muted font-weight-bold mb-0" style="font-size: 0.8rem; letter-spacing: 1px;">
-            Sugerowane połączenie #{{ $index + 1 }}
-          </h6>
-          <span class="badge bg-light text-dark border px-2 py-1 small fw-normal">
-            GZM Metropolia
-          </span>
+      <div class="d-flex justify-content-between align-items-center mb-3 px-1">
+        <div>
+          <h6 class="text-uppercase tracking-wider text-muted fw-bold mb-0" style="font-size: 0.75rem; letter-spacing: 0.5px;">Wariant trasy</h6>
+          <small class="text-secondary fw-semibold">Pokazujesz {{ currentItineraryIndex + 1 }} z {{ itineraries.length }}</small>
+        </div>
+        
+        <div class="d-flex align-items-center gap-2">
+          <button 
+            class="btn btn-light btn-sm rounded-circle border shadow-sm d-flex align-items-center justify-content-center p-0" 
+            style="width: 32px; height: 32px;"
+            [disabled]="itineraries.length <= 1"
+            (click)="changeItinerary('prev', itineraries.length)">
+            <i class="bi bi-chevron-left text-secondary"></i>
+          </button>
+
+          <button 
+            class="btn btn-light btn-sm rounded-circle border shadow-sm d-flex align-items-center justify-content-center p-0" 
+            style="width: 32px; height: 32px;"
+            [disabled]="itineraries.length <= 1"
+            (click)="changeItinerary('next', itineraries.length)">
+            <i class="bi bi-chevron-right text-secondary"></i>
+          </button>
+
+          <div class="vr mx-1 text-muted opacity-25" style="height: 20px;"></div>
+
+          <a routerLink="/plan-trip" class="btn btn-light btn-sm rounded-pill border fw-bold text-secondary px-3" style="font-size: 0.75rem;">
+            <i class="bi bi-arrow-left me-1"></i> Zmień
+          </a>
         </div>
       </div>
-      
-      <div class="card-body px-4 pt-2 pb-4">
-        <div class="position-relative container-fluid px-0">
-          
-          @for (leg of itinerary.legs; track $index; let isLast = $last) {
-            <div class="d-flex position-relative" [class.mb-0]="isLast">
-              
-              <div class="d-flex flex-column align-items-center position-relative me-3">
-                <div class="rounded-circle border border-2 border-white shadow-sm" 
-                     [ngClass]="leg.mode === 'WALK' ? 'bg-secondary' : leg.mode === 'BUS' ? 'bg-warning' : 'bg-danger'"
-                     style="width: 14px; height: 14px; z-index: 2; margin-top: 5px;">
-                </div>
-                @if (!isLast) {
-                  <div class="position-absolute h-100 border-start border-2 opacity-50"
-                       [ngClass]="leg.mode === 'WALK' ? 'border-secondary border-dashed' : leg.mode === 'BUS' ? 'border-warning' : 'border-danger'"
-                       style="left: 50%; transform: translateX(-50%); top: 12px; z-index: 1;">
-                  </div>
-                }
-              </div>
 
-              <div class="flex-grow-1 pb-4">
-                <div class="d-flex justify-content-between align-items-start mb-1">
-                  <div>
-                    <span class="fw-semibold text-dark d-block" style="font-size: 1rem;">
-                      {{ leg.from.name }}
-                    </span>
-                    
-                    <div class="d-flex align-items-center gap-2 mt-1">
-                      <span class="text-uppercase fw-bold text-muted small" style="font-size: 0.75rem; letter-spacing: 0.5px;">
-                        {{ leg.mode === 'WALK' ? 'Pieszo' : leg.mode === 'BUS' ? 'Autobus' : 'Tramwaj' }}
-                      </span>
-                      @if (leg.route) {
-                        <span class="badge rounded-1 px-2 py-0.5 text-white fw-bold shadow-sm"
-                              [ngClass]="leg.mode === 'BUS' ? 'bg-warning text-dark' : 'bg-danger'"
-                              style="font-size: 0.75rem;">
-                          {{ leg.route.shortName }}
+      <div class="overflow-hidden py-2 px-1">
+        
+        @let itinerary = itineraries[currentItineraryIndex];
+        
+        <div class="card border-0 shadow-sm bg-white rounded-3 overflow-hidden animate__animated" 
+             [ngClass]="animationClass"
+             style="animation-duration: 0.25s;">
+          
+          <div class="card-header bg-light bg-opacity-50 border-0 pt-3 px-4 pb-2 d-flex justify-content-between align-items-center">
+            <span class="badge bg-dark text-warning fw-bold px-2.5 py-1.5 rounded-2" style="font-size: 0.75rem;">
+              POŁĄCZENIE #{{ currentItineraryIndex + 1 }}
+            </span>
+            <div class="small text-muted fw-semibold">
+              <i class="bi bi-clock me-1"></i> GZM Metropolia
+            </div>
+          </div>
+          
+          <div class="card-body px-4 pt-3 pb-4">
+            <div class="position-relative">
+              
+              <div class="position-absolute bg-light" style="left: 6px; top: 12px; bottom: 12px; width: 2px; z-index: 1; opacity: 0.7;"></div>
+              
+              @for (leg of itinerary.legs; track $index) {
+                <div class="d-flex position-relative mb-4" [class.mb-0]="$last">
+                  
+                  <div class="d-flex flex-column align-items-center me-3 position-relative" style="z-index: 2;">
+                    <div class="rounded-circle bg-warning border border-2 border-white shadow-sm" style="width: 14px; height: 14px; margin-top: 5px;"></div>
+                  </div>
+                  
+                  <div class="flex-grow-1">
+                    <div class="d-flex justify-content-between align-items-start">
+                      <div>
+                        <span class="fw-bold text-dark d-block" style="font-size: 0.95rem;">{{ leg.from.name }}</span>
+                        <span class="text-uppercase text-muted fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;">Przystanek początkowy etapu</span>
+                      </div>
+                      <div class="text-end">
+                        <span class="badge bg-light text-dark border fw-bold px-2 py-1" style="font-size: 0.8rem;">
+                          {{ leg.startTime | date:'HH:mm' }}
                         </span>
+                      </div>
+                    </div>
+
+                    <div class="my-3 p-3 bg-light bg-opacity-50 rounded-2 border border-light shadow-xs">
+                      <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                        @if (leg.mode === 'WALK') {
+                          <span class="badge bg-secondary text-white px-2 py-1.5 rounded d-inline-flex align-items-center"><i class="bi bi-person-walking me-1"></i> PIESZO</span>
+                        } @else if (leg.mode === 'BUS') {
+                          <span class="badge bg-danger text-white px-2 py-1.5 rounded d-inline-flex align-items-center fw-bold"><i class="bi bi-bus-front me-1"></i> LINIA {{ leg.route?.shortName }}</span>
+                        } @else if (leg.mode === 'TRAM') {
+                          <span class="badge bg-primary text-white px-2 py-1.5 rounded d-inline-flex align-items-center fw-bold"><i class="bi bi-train-front me-1"></i> TRAMWAJ {{ leg.route?.shortName }}</span>
+                        }
+                        <span class="text-secondary small fw-medium"><i class="bi bi-hourglass-split me-0.5"></i> Czas: {{ Math.round(leg.duration / 60) }} min</span>
+                      </div>
+
+                      @if (leg.mode !== 'WALK') {
+                        <div class="mt-2 pt-2 border-top border-white" style="font-size: 0.8rem;">
+                          <div class="d-flex align-items-center justify-content-between mb-1">
+                            <span class="text-muted"><i class="bi bi-calculator me-1"></i> Wyliczona predykcja:</span>
+                            @if (leg.predictedDeviationMinutes !== undefined) {
+                              @if (leg.predictedDeviationMinutes > 0) {
+                                <span class="text-danger fw-bold"><i class="bi bi-exclamation-triangle-fill me-0.5"></i> Opóźnienie: +{{ leg.predictedDeviationMinutes }} min</span>
+                              } @else {
+                                <span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-0.5"></i> Planowo (0 min)</span>
+                              }
+                            } @else {
+                              <span class="text-muted italic">Brak danych historycznych</span>
+                            }
+                          </div>
+                          
+                          <div class="d-flex align-items-center justify-content-between text-muted" style="font-size: 0.75rem;">
+                            <span><i class="bi bi-database me-1"></i> Próbki w bazie SDIP:</span>
+                            <span class="fw-semibold text-dark">{{ leg.predictedSamplesCount || 0 }} przejazdów</span>
+                          </div>
+
+                          @if (leg.expectedStartTime) {
+                            <div class="d-flex align-items-center justify-content-between mt-1 pt-1 border-top border-dashed" style="font-size: 0.78rem;">
+                              <span class="text-dark fw-medium">Realny spodziewany start:</span>
+                              <span class="badge bg-warning text-dark fw-bold px-1.5 py-0.5">{{ leg.expectedStartTime | date:'HH:mm' }}</span>
+                            </div>
+                          }
+                        </div>
                       }
-                      <span class="text-muted small" style="font-size: 0.75rem;">
-                        &middot; {{ Math.ceil(leg.duration / 60) }} min
+                    </div>
+
+                  </div>
+                </div>
+              }
+
+              <div class="d-flex position-relative">
+                <div class="d-flex flex-column align-items-center me-3 position-relative" style="z-index: 2;">
+                  <div class="rounded-circle bg-dark border border-2 border-white shadow-sm" style="width: 14px; height: 14px; margin-top: 5px;"></div>
+                </div>
+                <div class="flex-grow-1">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                      <span class="fw-bold text-dark d-block" style="font-size: 0.95rem;">
+                        {{ itinerary.legs[itinerary.legs.length - 1].to.name }}
+                      </span>
+                      <span class="text-uppercase text-muted fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;">Miejsce docelowe podróży</span>
+                    </div>
+                    <div class="text-end">
+                      <span class="badge bg-dark text-white fw-bold px-2 py-1" style="font-size: 0.8rem;">
+                        {{ itinerary.legs[itinerary.legs.length - 1].endTime | date:'HH:mm' }}
                       </span>
                     </div>
                   </div>
-
-                  <div class="text-end ps-2">
-                    @if (leg.predictedDeviationMinutes && leg.predictedDeviationMinutes > 0) {
-                      <span class="text-muted text-decoration-line-through small d-block" style="font-size: 0.8rem;">
-                        {{ leg.startTime | date:'HH:mm' }}
-                      </span>
-                      <span class="text-danger fw-bold d-block" style="font-size: 0.95rem;">
-                        {{ leg.expectedStartTime | date:'HH:mm' }}
-                        
-                        @if (leg.isLive) {
-                          <span class="d-inline-block badge bg-danger text-white animate-pulse" style="font-size: 0.65rem; font-weight: 600; padding: 2px 5px;">
-                            • LIVE GZM (+{{ leg.predictedDeviationMinutes }} min)
-                          </span>
-                        } @else {
-                          <span class="d-block text-danger opacity-75" style="font-size: 0.7rem; font-weight: 500;">
-                            +{{ leg.predictedDeviationMinutes }} min prognozy
-                          </span>
-                        }
-                      </span>
-                    } @else {
-                      <span class="text-dark fw-bold d-block" style="font-size: 0.95rem;">
-                        {{ leg.startTime | date:'HH:mm' }}
-                      </span>
-                      @if (leg.mode !== 'WALK') {
-                        <span class="text-success d-block" style="font-size: 0.7rem; font-weight: 500;">
-                          @if (leg.isLive) { O czasie (LIVE) } @else { Rozkładowo }
-                        </span>
-                      }
-                    }
-                  </div>
-                </div>
-
-                <div class="text-muted small mt-1" style="font-size: 0.85rem;">
-                  Kierunek: <span class="text-dark">{{ leg.to.name }}</span>
-                </div>
-
-                @if (leg.mode !== 'WALK' && !leg.isLive && leg.predictedSamplesCount !== undefined) {
-                  <div class="mt-2 pt-1 border-top border-light text-muted opacity-75" style="font-size: 0.75rem;">
-                    @if (leg.predictedSamplesCount > 0) {
-                      <span>Model oparty o <strong>{{ leg.predictedSamplesCount }}</strong> historycznych kursów.</span>
-                    } @else {
-                      <span class="fst-italic">Brak danych historycznych dla tego przebiegu.</span>
-                    }
-                  </div>
-                }
-              </div>
-            </div>
-          }
-
-          <div class="d-flex position-relative">
-            <div class="d-flex flex-column align-items-center me-3 position-relative">
-              <div class="rounded-circle bg-dark border border-2 border-white shadow-sm" 
-                   style="width: 14px; height: 14px; z-index: 2; margin-top: 5px;">
-              </div>
-            </div>
-            <div class="flex-grow-1">
-              <div class="d-flex justify-content-between align-items-start">
-                <div>
-                  <span class="fw-bold text-dark d-block" style="font-size: 1rem;">
-                    {{ itinerary.legs[itinerary.legs.length - 1].to.name }}
-                  </span>
-                  <span class="text-uppercase fw-bold text-muted small" style="font-size: 0.75rem; letter-spacing: 0.5px;">
-                    Miejsce docelowe
-                  </span>
-                </div>
-                <div class="text-end">
-                  <span class="badge bg-dark text-white fw-bold px-2 py-1" style="font-size: 0.9rem;">
-                    {{ itinerary.legs[itinerary.legs.length - 1].endTime | date:'HH:mm' }}
-                  </span>
                 </div>
               </div>
+
             </div>
           </div>
-
         </div>
       </div>
+
+      @if (itineraries.length > 1) {
+        <div class="d-flex justify-content-center gap-2 mt-2">
+          @for (item of itineraries; track $index) {
+            <div class="rounded-pill" 
+                 [style.width]="currentItineraryIndex === $index ? '18px' : '6px'" 
+                 [style.height]="'6px'"
+                 [class]="currentItineraryIndex === $index ? 'bg-warning' : 'bg-secondary opacity-25'"
+                 style="transition: width 0.2s ease;">
+            </div>
+          }
+        </div>
+      }
+
     </div>
-
   }
-}
 
-@if (hasSearched && itineraries.length === 0 && !isLoading) {
-  <div class="text-center my-4 text-muted small">
-    Nie znaleziono żadnych połączeń dla podanych parametrów.
-  </div>
-}
+  @if (hasSearched && itineraries.length === 0 && !isLoading) {
+    <div class="text-center my-5 py-5 bg-white shadow-sm rounded border border-light mx-auto animate__animated animate__fadeIn" style="max-width: 550px;">
+      <div class="display-1 text-muted opacity-50 mb-3"><i class="bi bi-emoji-frown"></i></div>
+      <h5 class="text-dark fw-bold">Nie znaleziono połączeń</h5>
+      <p class="text-muted small mb-4 px-4">Baza OpenTripPlanner nie była w stanie wyznaczyć trasy dla podanych kryteriów i lokalizacji w wybranym oknie czasowym.</p>
+      <a routerLink="/plan-trip" class="btn btn-dark btn-sm fw-bold px-4 py-2 rounded-pill shadow-sm">Spróbuj ponownie</a>
+    </div>
+  }
+</div>
