@@ -54,15 +54,13 @@ export class TripPlannerFormComponent implements OnInit {
   });
 
   constructor() {
-    // REAKTYWNY EFEKT: Nasłuchiwanie zmian w sygnale activeFavoriteRoute
     effect(() => {
       const activeRoute = this.authService.activeFavoriteRoute();
       if (activeRoute) {
         console.log('Zaobserwowano wybór ulubionej trasy:', activeRoute);
 
-        // 1. Rekonstruujemy obiekty SdipStop z danych z bazy (snake_case z MySQL)
         this.selectedFromStop = {
-          id: 'fav_from', // tymczasowe ID, ważne aby obiekt nie był null
+          id: 'fav_from',
           name: activeRoute.from_stop_name,
           municipality: '', 
           lat: Number(activeRoute.from_lat),
@@ -77,7 +75,6 @@ export class TripPlannerFormComponent implements OnInit {
           lon: Number(activeRoute.to_lon)
         };
 
-        // 2. Aktualizujemy wartości tekstowe w formularzu Reactive Forms
         this.searchForm.patchValue({
           fromStopName: activeRoute.from_stop_name,
           toStopName: activeRoute.to_stop_name
@@ -85,7 +82,6 @@ export class TripPlannerFormComponent implements OnInit {
 
         console.log('Obiekty przystanków zostały odtworzone. Uruchamiam wyszukiwanie...');
 
-        // 3. Wywołujemy natychmiastowe wyszukanie i przekierowanie
         this.onSubmit();
       }
     });
