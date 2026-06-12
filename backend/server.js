@@ -32,6 +32,6 @@ app.use('/api', apiRouter);
 app.use('/user', userRouter);
 app.use('/auth', authRouter);
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Main server is running on port ${PORT}`);
 });
