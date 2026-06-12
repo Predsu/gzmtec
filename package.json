@@ -1,4 +1,13 @@
 {
+  "name": "gzmtec-monorepo",
+  "version": "1.0.0",
+  "scripts": {
+    "install-backend": "cd backend && npm install",
+    "install-frontend": "cd frontend && npm install",
+    "build-frontend": "cd frontend && npm run build -- --configuration=production",
+    "build": "npm run install-backend && npm run install-frontend && npm run build-frontend",
+    "start": "node backend/server.js"
+  },
   "dependencies": {
     "ci": "^2.3.0"
   },
