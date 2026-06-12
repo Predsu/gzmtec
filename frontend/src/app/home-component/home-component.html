@@ -1,16 +1,17 @@
+<title>Home · GZMTEC</title>
 <div class="bg-dark text-white py-5 mb-5 position-relative overflow-hidden" style="min-height: 450px; display: flex; align-items: center;">
   <div class="position-absolute w-100 h-100 opacity-25" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 20px 20px; top:0; left:0;"></div>
   
   <div class="container position-relative z-1">
     <div class="row align-items-center">
       <div class="col-lg-7 animate__animated animate__fadeInLeft">
-        <span class="badge bg-warning text-dark mb-3 fw-bold px-3 py-2 text-uppercase tracking-wider" style="font-size: 0.8rem;">Projekt Systemu Monitoringu Metropolii</span>
+        <span class="badge text-dark mb-3 fw-bold px-3 py-2 text-uppercase tracking-wider" style="font-size: 0.8rem; background-color: #fbf236;">System Monitoringu Opóźnień GZM</span>
         <h1 class="display-4 fw-bold mb-3">Inteligentne Planowanie Podróży w GZM</h1>
         <p class="lead text-muted-light mb-4" style="color: #adb5bd; font-size: 1.25rem;">
           GZMTEC łączy tradycyjne wyszukiwanie połączeń przesiadkowych z zaawansowaną analizą historycznych odchyleń i opóźnień autobusów oraz tramwajów w czasie rzeczywistym.
         </p>
         <div class="d-flex gap-3">
-          <a href="/plan-trip" class="btn btn-warning btn-lg fw-bold px-4 py-3 shadow-sm transition-transform">
+          <a href="/plan-trip" class="btn btn-lg fw-bold px-4 py-3 shadow-sm transition-transform" style="background-color: #fbf236">
             <i class="bi bi-route animate__animated animate__pulse animate__infinite d-inline-block"></i> Otwórz Planer
           </a>
           <a href="/user-profile" class="btn btn-outline-light btn-lg px-4 py-3">
@@ -19,12 +20,13 @@
         </div>
       </div>
       <div class="col-lg-5 d-none d-lg-block text-center animate__animated animate__fadeInRight">
-        <div class="display-1 text-warning mb-2"><i class="bi bi-cpu-fill"></i></div>
+        <div class="display-1 mb-2" style="background-color: #fbf236"><i class="bi bi-cpu-fill"></i></div>
         <div class="bg-secondary bg-opacity-25 p-4 rounded-3 border border-secondary shadow">
-          <code class="text-warning small text-start d-block">
+          <code class="small text-start d-block" style="color: #fbf236">
             [GZMTEC_LOG] Analiza kursu M3/108...<br>
             [DANE] Pobrano 42 historyczne próbki.<br>
-            [PREDYKCJA] Średnie odchylenie: +4 min.<br>
+            [AGREGACJA] Wydzielono 6 znaczących próbek.<br>
+            [PREDYKCJA] Przewidywane opóźnienie: +4 min.<br>
             [STATUS] Skorygowano przesiadkę na stan LIVE.
           </code>
         </div>
@@ -36,7 +38,7 @@
 <div class="container my-5">
   <div class="text-center mb-5 animate__animated animate__fadeIn">
     <h2 class="fw-bold text-dark">Co potrafi GZMTEC?</h2>
-    <p class="text-muted">Trzy kluczowe segmenty systemu stworzone z myślą o pasażerach aglomeracji.</p>
+    <!-- <p class="text-muted">Trzy kluczowe segmenty systemu stworzone z myślą o pasażerach metropolii.</p> -->
   </div>
 
   <div class="row g-4">
@@ -53,10 +55,10 @@
 
     <div class="col-md-4 animate__animated animate__fadeInUp animate__delay-0.7s" style="animation-delay: 0.1s;">
       <div class="card h-100 border-0 shadow-sm p-4 text-center card-hover-effect">
-        <div class="ln-icon text-warning display-4 mb-3"><i class="bi bi-graph-up-arrow"></i></div>
-        <h4 class="fw-bold text-dark mb-2">Predykcja Odchyleń</h4>
+        <div class="ln-icon display-4 mb-3" style="background-color: #fbf236"><i class="bi bi-graph-up-arrow"></i></div>
+        <h4 class="fw-bold text-dark mb-2">Predykcja Opóźnień</h4>
         <p class="text-muted small">
-          Nasz algorytm sprawdza bazę danych z archiwalnymi przejazdami i oblicza logarytmiczną średnią opóźnień dla konkretnej linii na wybranym przystanku.
+          Nasz algorytm sprawdza bazę danych z archiwalnymi przejazdami i oblicza przewidywane opóźnienia dla konkretnej linii na wybranym przystanku.
         </p>
         <a href="/backend-status" class="mt-auto text-decoration-none fw-bold text-warning small">Status bazy &rarr;</a>
       </div>
@@ -67,7 +69,7 @@
         <div class="ln-icon text-success display-4 mb-3"><i class="bi bi-bookmark-star"></i></div>
         <h4 class="fw-bold text-dark mb-2">Szybkie Połączenia</h4>
         <p class="text-muted small">
-          Zaloguj się na swoje konto pasażera GZM, aby zapisywać najczęstsze trasy (np. dom-szkoła, praca). Załadujesz je jednym kliknięciem.
+          Zaloguj się na swoje konto pasażera GZMTEC, aby zapisywać najczęstsze trasy (np. dom-szkoła, praca). Załadujesz je jednym kliknięciem: z pulpitu czy widgetu na telefonie.
         </p>
         <a href="/user-profile" class="mt-auto text-decoration-none fw-bold text-success small">Mój profil &rarr;</a>
       </div>
@@ -87,26 +89,63 @@
         <div class="d-flex mb-4">
           <div class="me-3 fs-3 text-dark"><i class="bi bi-1-circle-fill"></i></div>
           <div>
-            <h5 class="fw-bold mb-1">Agregacja danych SDIP</h5>
-            <p class="text-muted small">System stale rejestruje rzeczywiste czasy odjazdów pojazdów z oficjalnych API Transport GZM i buduje lokalną bazę zachowań komunikacyjnych.</p>
+            <h5 class="fw-bold mb-1 text-warning animate__animated animate__fadeInRight">Agregacja danych SDIP</h5>
+            <p class="text-muted small animate__animated animate__fadeInRight">System stale rejestruje rzeczywiste czasy odjazdów pojazdów z oficjalnych API GZM i buduje lokalną bazę zachowań komunikacyjnych. Pod uwagę brane są także dane pogodowe oraz korki z API Google Maps.</p>
           </div>
         </div>
 
         <div class="d-flex mb-4">
           <div class="me-3 fs-3 text-dark"><i class="bi bi-2-circle-fill"></i></div>
           <div>
-            <h5 class="fw-bold mb-1">Logarytmiczne wygładzanie próbki</h5>
-            <p class="text-muted small">Zamiast prostej średniej matematycznej, która jest podatna na anomalie (np. wypadek raz w roku), stosujemy tłumienie odchyleń, dające realny podgląd sytuacji.</p>
+            <h5 class="fw-bold mb-1 text-success animate__animated animate__fadeInRight animate__delay-0.7s" style="animation-delay: 0.1s;">Wielopoziomowe algorytmy obliczeniowe</h5>
+            <p class="text-muted small animate__animated animate__fadeInRight animate__delay-0.7s" style="animation-delay: 0.1s;">Zamiast prostej średniej matematycznej, która jest podatna na anomalie (np. wypadek raz w roku), stosujemy wygładzanie logarytmiczne, medianę oraz szereg innych rozwiązań dających możliwie najbardziej realny podgląd sytuacji.</p>
           </div>
         </div>
 
         <div class="d-flex">
           <div class="me-3 fs-3 text-dark"><i class="bi bi-3-circle-fill"></i></div>
           <div>
-            <h5 class="fw-bold mb-1">Weryfikacja przesiadek LIVE</h5>
-            <p class="text-muted small">Planer ostrzega Cię przed zbyt krótkim czasem na zmianę linii, automatycznie przesuwając oczekiwany czas startu kolejnego etapu drogi.</p>
+            <h5 class="fw-bold mb-1 text-primary animate__animated animate__fadeInRight" style="animation-delay: 0.2s;">Weryfikacja drogi LIVE</h5>
+            <p class="text-muted small animate__animated animate__fadeInRight" style="animation-delay: 0.2s;">Planer ostrzega przed zbyt krótkim czasem na zmianę linii, automatycznie przesuwając oczekiwany czas startu kolejnego etapu drogi oraz aktualizując alternatywne możliwości transportu. Podczas podróży aplikacja prowadzi Cię na bieżąco przez kolejne etapy.</p>
           </div>
         </div>
+      </div>
+      
+    </div>
+  </div>
+  <hr>
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <h3 class="fw-bold text-dark mb-4">Dlaczego GZMTEC?</h3>
+        
+        <div class="d-flex mb-4">
+          <div class="me-3 fs-3 text-dark"><i class="bi bi-1-circle-fill"></i></div>
+          <div>
+            <h5 class="fw-bold mb-1 text-primary animate__animated animate__fadeInLeft">Darmowy</h5>
+            <p class="text-muted small animate__animated animate__fadeInLeft">Nie pobieramy żadnych opłat za korzystanie z aplikacji. Jedynym warunkiem jest założenie konta pasażera. I tyle! Mozesz ruszać w trasę!</p>
+            <p class="text-muted small animate__animated animate__fadeInLeft">(Serwery wciąż kosztują, mimo że żadne opłaty nie są wymagane, to wsparcie jest mile widziane)</p>
+          </div>
+        </div>
+
+        <div class="d-flex mb-4">
+          <div class="me-3 fs-3 text-dark"><i class="bi bi-2-circle-fill"></i></div>
+          <div>
+            <h5 class="fw-bold mb-1 text-warning animate__animated animate__fadeInLeft" style="animation-delay: 0.1s;">Otwartoźródłowy i niezależny</h5>
+            <p class="text-muted small animate__animated animate__fadeInLeft" style="animation-delay: 0.1s;">Pełny kod aplikacji jest dostępny dla wszystkich. W razie potrzeby mozna go modyfikować, ulepszać, zainstalować lokalnie czy nawet przenieść się do innego systemu komunikacji miejskiej (wymagane pliki GTFS i PBF). Działamy nieżaleznie i nie jesteśmy związani z Transport GZM.</p>
+          </div>
+        </div>
+
+        <div class="d-flex">
+          <div class="me-3 fs-3 text-dark"><i class="bi bi-3-circle-fill"></i></div>
+          <div>
+            <h5 class="fw-bold mb-1 text-success animate__animated animate__fadeInLeft" style="animation-delay: 0.2s;">Nieustanny rozwój</h5>
+            <p class="text-muted small animate__animated animate__fadeInLeft" style="animation-delay: 0.2s;">Ciągle planujemy nowe rozwiązania i ulepszanie algorytmu aby zapewnić jak najlepsze wrażenia z podrózy. Oferujemy wsparcie dla wszystkich uzytkowników oraz mozliwość dołożenia swojej cegiełki do procesu powstawania GZMTEC: zarówno przez wsparcie finansowe, jak i wsparcie w kodzie.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <img src="m11bus.jpg" class="img-fluid rounded-3 shadow animate__animated animate__fadeIn" alt="Autobus GZM">
       </div>
     </div>
   </div>
@@ -140,7 +179,7 @@
     <div class="text-center text-muted small">
       <img src="https://i0.wp.com/opensource.org/wp-content/uploads/2009/08/osi_black_and_white_light_backgrounds_logo_0.png?w=1500&quality=80&ssl=1" 
        alt="Open Source Logo" 
-       style="height: 1em; vertical-align: middle;"> 2026 GZMTEC by ToriYukari
+       style="height: 1em; vertical-align: middle;"> 2026 GZMTEC by <a href="https://github.com/Predsu" class="text-warning">ToriYukari</a>
     </div>
   </div>
 </footer>
