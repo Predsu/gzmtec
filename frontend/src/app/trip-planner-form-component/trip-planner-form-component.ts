@@ -1,10 +1,11 @@
-import { Component, inject, OnInit, effect } from '@angular/core'; 
+import { Component, inject, OnInit, effect, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { TripPlannerService } from '../trip-planner-service';
 import { AuthService } from '../auth-service'; 
-import { debounceTime, map } from 'rxjs/operators';
+import { debounceTime } from 'rxjs/operators';
+import { Network } from '@capacitor/network';
 
 export interface SdipStop {
   id: string;
@@ -25,8 +26,34 @@ export class TripPlannerFormComponent implements OnInit {
   private router = inject(Router);
   private tripService = inject(TripPlannerService);
   protected authService = inject(AuthService); 
+  private route = inject(ActivatedRoute);
+  private cdr = inject(ChangeDetectorRef);
 
   isMenuCollapsed = true;
+
+  isOnline: boolean = true;
+
+  async setupOnlineListeners() {
+    try {
+      const status = await Network.getStatus();
+      this.isOnline = status.connected;
+      this.cdr.detectChanges();
+    } catch (e) {
+      console.error('Błąd pobierania statusu sieci:', e);
+    }
+
+    Network.addListener('networkStatusChange', status => {
+      console.log('Natywna zmiana stanu sieci w Capacitor:', status);
+      this.isOnline = status.connected;
+      this.cdr.detectChanges();
+    });
+  }
+
+  async checkConnection() {
+    const status = await Network.getStatus();
+    this.isOnline = status.connected;
+    this.cdr.detectChanges();
+  }
 
   toggleNavbar() {
     this.isMenuCollapsed = !this.isMenuCollapsed;
@@ -45,6 +72,8 @@ export class TripPlannerFormComponent implements OnInit {
 
   selectedFromStop: SdipStop | null = null;
   selectedToStop: SdipStop | null = null;
+
+  isArrivalMode: boolean = false; 
 
   searchForm: FormGroup = this.fb.group({
     fromStopName: ['', Validators.required],
@@ -81,45 +110,117 @@ export class TripPlannerFormComponent implements OnInit {
         }, { emitEvent: false });
 
         console.log('Obiekty przystanków zostały odtworzone. Uruchamiam wyszukiwanie...');
-
         this.onSubmit();
       }
     });
   }
 
-  async ngOnInit() {
-    const rawStops = await this.tripService.getAllStops();
-    this.allUniqueStops = this.processAndGroupStops(rawStops);
+  ngOnInit() {
+    this.tripService.getAllStops()
+      .then((stops: SdipStop[]) => {
+        const uniqueMap = new Map<string, SdipStop>();
+        
+        stops.forEach(stop => {
+          if (!uniqueMap.has(stop.name)) {
+            uniqueMap.set(stop.name, stop);
+          }
+        });
 
-    this.searchForm.get('fromStopName')?.valueChanges.pipe(
-      debounceTime(150),
-      map(value => this.filterStops(value))
-    ).subscribe(stops => this.filteredFromStops = stops);
+        this.allUniqueStops = Array.from(uniqueMap.values());
+        
+        console.log('Pomyślnie załadowano UNIKALNE przystanki GZMTEC:', this.allUniqueStops.length);
+      })
+      .catch((err) => {
+        console.error('Błąd podczas ładowania przystanków:', err);
+        this.allUniqueStops = [];
+      });
 
-    this.searchForm.get('toStopName')?.valueChanges.pipe(
-      debounceTime(150),
-      map(value => this.filterStops(value))
-    ).subscribe(stops => this.filteredToStops = stops);
-  }
+    this.searchForm.get('fromStopName')?.valueChanges
+      .pipe(debounceTime(40))
+      .subscribe(value => {
+        if (!value || value.trim().length < 2) {
+          this.filteredFromStops = [];
+          return;
+        }
 
-  private processAndGroupStops(stops: any[]): SdipStop[] {
-    if (!Array.isArray(stops)) return [];
-    const uniqueMap = new Map<string, SdipStop>();
-    stops.forEach(stop => {
-      const key = `${stop.name.toLowerCase().trim()}_${stop.municipality.toLowerCase().trim()}`;
-      if (!uniqueMap.has(key)) {
-        uniqueMap.set(key, { id: stop.id, name: stop.name, municipality: stop.municipality, lat: Number(stop.lat), lon: Number(stop.lon) });
+        if (this.selectedFromStop && value === this.selectedFromStop.name) {
+          this.filteredFromStops = [];
+        } else {
+          this.filteredFromStops = this.filterStops(value);
+        }
+      });
+
+    this.searchForm.get('toStopName')?.valueChanges
+      .pipe(debounceTime(250))
+      .subscribe(value => {
+        if (!value || value.trim().length < 2) {
+          this.filteredToStops = [];
+          return;
+        }
+
+        if (this.selectedToStop && value === this.selectedToStop.name) {
+          this.filteredToStops = [];
+        } else {
+          this.filteredToStops = this.filterStops(value);
+        }
+      });
+
+    this.route.queryParams.subscribe(params => {
+      const fName = params['fromName'];
+      const tName = params['toName'];
+
+      if (fName && tName) {
+        this.selectedFromStop = {
+          id: 'query_from',
+          name: fName,
+          municipality: '',
+          lat: Number(params['fromLat']),
+          lon: Number(params['fromLon'])
+        };
+
+        this.selectedToStop = {
+          id: 'query_to',
+          name: tName,
+          municipality: '',
+          lat: Number(params['toLat']),
+          lon: Number(params['toLon'])
+        };
+
+        this.searchForm.patchValue({
+          fromStopName: fName,
+          toStopName: tName
+        }, { emitEvent: false });
+
+        this.filteredFromStops = [];
+        this.filteredToStops = [];
       }
     });
-    return Array.from(uniqueMap.values());
+
+    this.setupOnlineListeners();
   }
 
-  private filterStops(value: string): SdipStop[] {
-    const filterValue = (value || '').toLowerCase().trim();
-    if (filterValue.length < 2) return [];
+  filterStops(value: string): SdipStop[] {
+    const filterValue = value.toLowerCase();
     return this.allUniqueStops.filter(stop => 
-      stop.name.toLowerCase().includes(filterValue) || stop.municipality.toLowerCase().includes(filterValue)
-    ).slice(0, 8);
+      stop.name.toLowerCase().includes(filterValue)
+    );
+  }
+
+  swapStops(): void {
+    const tempStop = this.selectedFromStop;
+    const currentFromName = this.searchForm.get('fromStopName')?.value || '';
+    const currentToName = this.searchForm.get('toStopName')?.value || '';
+
+    this.selectedFromStop = this.selectedToStop;
+    this.selectedToStop = tempStop;
+
+    this.searchForm.patchValue({
+      fromStopName: currentToName,
+      toStopName: currentFromName
+    });
+
+    this.filteredFromStops = [];
+    this.filteredToStops = [];
   }
 
   selectFromStop(stop: SdipStop) {
@@ -154,6 +255,18 @@ export class TripPlannerFormComponent implements OnInit {
   onSubmit() {
     if (this.searchForm.valid && this.selectedFromStop && this.selectedToStop) {
       const formValues = this.searchForm.value;
+      let finalTime = formValues.time;
+
+      if (this.isArrivalMode) {
+        const [hours, minutes] = finalTime.split(':').map(Number);
+        const dateObj = new Date();
+        dateObj.setHours(hours);
+        dateObj.setMinutes(minutes - 35);
+
+        const pad = (num: number) => num.toString().padStart(2, '0');
+        finalTime = `${pad(dateObj.getHours())}:${pad(dateObj.getMinutes())}`;
+      }
+
       this.router.navigate(['/trip-planner-displayer'], {
         queryParams: {
           fromLat: this.selectedFromStop.lat,
@@ -161,11 +274,9 @@ export class TripPlannerFormComponent implements OnInit {
           toLat: this.selectedToStop.lat,
           toLon: this.selectedToStop.lon,
           date: formValues.date,
-          time: formValues.time
+          time: finalTime
         }
       });
-    } else {
-      this.searchForm.markAllAsTouched();
     }
   }
 }

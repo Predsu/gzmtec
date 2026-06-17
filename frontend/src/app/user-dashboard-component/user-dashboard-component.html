@@ -31,6 +31,7 @@
 <div class="bg-dark text-white py-5 mb-5 position-relative overflow-hidden" style="height: 100%; display: flex; align-items: center;">
   <div class="position-absolute w-100 h-100 opacity-25" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 20px 20px; top:0; left:0;"></div>
 
+@if (isOnline) {
 <div class="container animate__animated animate__fadeIn" style="min-height: 26rem;">
   <div class="card border-0 shadow-sm mx-auto my-4 bg-white rounded-3" style="max-width: 550px;">
     
@@ -145,6 +146,26 @@
 
   </div>
 </div>
+} @else {
+    <div class="row justify-content-center animate__animated animate__fadeIn">
+      <div class="col-md-6 text-center py-5">
+        <div class="card border border-light-subtle shadow-sm rounded-3 p-4 bg-white">
+          <div class="card-body">
+            <div class="mb-4">
+              <i class="bi bi-wifi-off text-danger" style="font-size: 3.5rem;"></i>
+            </div>
+            <h5 class="card-title fw-bold text-dark mb-2">Brak połączenia z siecią</h5>
+            <p class="card-text text-muted small px-3">
+              System monitoringu i prognozowania opóźnień <strong>GZMTEC</strong> wymaga aktywnego połączenia internetowego, aby przetwarzać dane z SDIP oraz Open-Meteo w czasie rzeczywistym.
+            </p>
+            <button type="button" class="btn btn-dark btn-sm fw-semibold px-4 py-2 mt-3 shadow-sm rounded-2" (click)="checkConnection()">
+              <i class="bi bi-arrow-clockwise me-1"></i> Spróbuj ponownie
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
 </div>
 
 <footer class="bg-white pt-5 pb-4 border-top">
