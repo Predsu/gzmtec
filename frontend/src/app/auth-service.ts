@@ -1,4 +1,5 @@
 import { Injectable, signal } from '@angular/core';
+import { environment } from '../environments/environment.development';
 
 export interface FavoriteRoute {
   id: number;
@@ -29,7 +30,7 @@ export class AuthService {
   }
 
   async login(credentials: any) {
-    const res = await fetch('http://localhost:3000/auth/login', {
+    const res = await fetch(`http://${environment.apiUrl}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(credentials)
@@ -44,7 +45,7 @@ export class AuthService {
   }
 
   async register(userData: any) {
-    const res = await fetch('http://localhost:3000/auth/register', {
+    const res = await fetch(`http://${environment.apiUrl}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(userData)
@@ -63,14 +64,14 @@ export class AuthService {
 
   async getFavorites(): Promise<FavoriteRoute[]> {
     if (!this.token) return [];
-    const res = await fetch('http://localhost:3000/user/favorites', {
+    const res = await fetch(`http://${environment.apiUrl}/user/favorites`, {
       headers: { 'Authorization': `Bearer ${this.token}` }
     });
     return res.ok ? await res.json() : [];
   }
 
   async addFavorite(routeData: any) {
-    const res = await fetch('http://localhost:3000/user/favorites', {
+    const res = await fetch(`http://${environment.apiUrl}/user/favorites`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
