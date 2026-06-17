@@ -4,6 +4,7 @@ import { TripPlannerDisplayerComponent } from './trip-planner-displayer-componen
 import { TripPlannerFormComponent } from './trip-planner-form-component/trip-planner-form-component';
 import { UserDashboardComponent } from './user-dashboard-component/user-dashboard-component';
 import { HomeComponent } from './home-component/home-component';
+import { StopTimetableComponent } from './stop-timetable-component/stop-timetable-component';
 
 export const routes: Routes = [
     {
@@ -25,5 +26,9 @@ export const routes: Routes = [
     {
         path: '',
         component: HomeComponent
+    },
+    { 
+        path: 'stop-timetable', 
+        component: StopTimetableComponent 
     }
 ];

@@ -34,4 +34,18 @@ export class TripPlannerService {
       return [];
     }
   }
+
+  async getStopDepartures(stopId: string) {
+    const url = `http://${environment.apiUrl}/api/stops/${stopId}/departures`;
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Network error: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("ERR with fetching stop departures:", error);
+      return [];
+    }
+  }
 }

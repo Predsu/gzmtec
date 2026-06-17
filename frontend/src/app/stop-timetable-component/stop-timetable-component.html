@@ -1,0 +1,126 @@
+<title>Tablice Live · GZMTEC</title>
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm mb-3">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center me-4" href="/">
+      <img src="gzmteclogo.png" class="rounded float-start" alt="Logo" style="height: 50px; width: auto; object-fit: contain;">
+    </a>
+    <button class="navbar-toggler" type="button" (click)="toggleNavbar()">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" [class.show]="!isMenuCollapsed" id="navbarSdCt">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link text-secondary" href="/plan-trip">Planer Trasy</a></li>
+        <li class="nav-item"><a class="nav-link active fw-bold text-dark" href="/stop-timetable">Tablice Przystankowe</a></li>
+        <li class="nav-item"><a class="nav-link text-secondary" href="/user-profile">Profil Użytkownika</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  @if (isOnline) {
+    <div class="card shadow-sm border border-light-subtle rounded-3 p-3 mb-4 bg-white">
+      <form [formGroup]="searchForm" autocomplete="off">
+        <div class="position-relative">
+          <label class="form-label text-uppercase text-muted fw-bold small mb-1" style="font-size: 0.65rem; letter-spacing: 0.5px;">Wyszukaj Przystanek</label>
+          <div class="input-group shadow-sm rounded">
+            <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-search"></i></span>
+            <input type="text" class="form-control border-start-0" placeholder="Zacznij wpisywać nazwę (np. Chorzów Rynek)..." formControlName="stopSearch">
+          </div>
+
+          @if (filteredStops.length > 0) {
+            <div class="position-absolute w-100 bg-white border border-light-subtle rounded shadow-lg mt-1 overflow-y-auto" style="z-index: 9999 !important; max-height: 220px; left: 0;">
+              @for (stop of filteredStops; track stop.id) {
+                <button type="button" class="btn btn-link w-100 text-start text-decoration-none text-dark px-3 py-2 border-bottom border-light-subtle dropdown-item d-flex justify-content-between align-items-center"
+                        (click)="selectStop(stop)">
+                  <span><i class="bi bi-geo-alt text-muted me-2"></i><strong>{{ stop.name }}</strong></span>
+                  <span class="badge bg-light text-secondary border font-monospace" style="font-size: 0.65rem;">{{ stop.municipality }}</span>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </form>
+    </div>
+
+    @if (selectedStop) {
+      <div class="card shadow border-0 rounded-3 overflow-hidden bg-white">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+          <div>
+            <h2 class="h5 mb-0 fw-bold"><i class="bi bi-display-fill text-warning me-2"></i>{{ selectedStop.name }}</h2>
+            <small class="text-white-50 text-uppercase tracking-wider font-monospace" style="font-size: 0.65rem;">Miejscowość: {{ selectedStop.municipality }}</small>
+          </div>
+          <button class="btn btn-sm btn-outline-light rounded-circle p-2" (click)="fetchLiveDepartures()" [disabled]="isLoading">
+            <i class="bi bi-arrow-clockwise d-inline-block" [class.bi-spin]="isLoading"></i>
+          </button>
+        </div>
+
+        <div class="card-body p-0 bg-light">
+          @if (departures.length > 0) {
+            <div class="list-group list-group-flush">
+              @for (dep of departures; track dep.lineLabel + dep.actualTime) {
+                <div class="list-group-item d-flex align-items-center justify-content-between py-3 px-3 bg-white border-bottom border-light-subtle">
+                  
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center justify-content-center bg-dark text-white fw-bolder rounded-2 font-monospace shadow-sm" 
+                         style="width: 48px; height: 36px; font-size: 1.1rem;">
+                      {{ dep.lineLabel }}
+                    </div>
+                    <div>
+                      <span class="text-uppercase text-muted fw-bold d-block" style="font-size: 0.55rem; letter-spacing: 0.5px;">Kierunek</span>
+                      <span class="fw-bold text-dark fs-6">{{ dep.direction }}</span>
+                    </div>
+                  </div>
+
+                  <div class="text-end">
+                    @if (dep.minutesLeft <= 0) {
+                      <span class="badge bg-danger text-white px-2 py-1 fw-bold text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                        <i class="bi bi-broadcast animate__animated animate__flash animate__infinite me-1"></i> Odjeżdża
+                      </span>
+                    } @else if (dep.minutesLeft < 60) {
+                      <span class="text-dark fw-extrabold fs-4 font-monospace">{{ dep.minutesLeft }} <span class="fs-6 fw-normal text-muted">min</span></span>
+                    } @else {
+                      <span class="text-secondary fw-bold fs-5 font-monospace">{{ dep.actualTime }}</span>
+                    }
+
+                    <small class="d-block text-muted" style="font-size: 0.55rem; margin-top: 1px;">
+                      @if (dep.isLive) {
+                        <span class="text-success fw-semibold"><i class="bi bi-rss-fill me-1"></i>Czas Realny (GPS)</span>
+                      } @else {
+                        <span class="text-primary fw-semibold"><i class="bi bi-cpu-fill me-1"></i>Prognoza GZMTEC</span>
+                      }
+                    </small>
+                  </div>
+
+                </div>
+              }
+            </div>
+          } @else if (!isLoading) {
+            <div class="text-center py-5 bg-white text-muted">
+              <i class="bi bi-slash-circle mb-2 d-block" style="font-size: 2rem;"></i>
+              <p class="small mb-0">Brak zaplanowanych odjazdów w najbliższym czasie.</p>
+            </div>
+          }
+        </div>
+      </div>
+    } @else {
+      <div class="text-center py-5 mt-4 text-muted border border-dashed rounded-3 bg-white shadow-sm">
+        <i class="bi bi-window-sidebar mb-3 d-block text-secondary" style="font-size: 3rem;"></i>
+        <h5 class="fw-bold text-dark mb-1">Wybierz przystanek z listy</h5>
+        <p class="small px-4 mb-0">Wpisz nazwę, aby otworzyć wirtualną tablicę odjazdów aktualizowaną na żywo co 20 sekund.</p>
+      </div>
+    }
+
+  } @else {
+    <div class="card border border-light-subtle shadow-sm rounded-3 p-4 bg-white text-center my-4 animate__animated animate__fadeIn">
+      <div class="card-body">
+        <i class="bi bi-wifi-off text-danger mb-3 d-block" style="font-size: 3rem;"></i>
+        <h5 class="card-title fw-bold text-dark">Tryb offline</h5>
+        <p class="card-text text-muted small">Wirtualna tablica odjazdów wymaga aktywnego połączenia z internetem w celu komunikacji z SDIP ZTM GZM.</p>
+        <button type="button" class="btn btn-dark btn-sm fw-semibold px-4 py-2 mt-2 shadow-sm rounded-2" (click)="checkConnection()">
+          <i class="bi bi-arrow-clockwise me-1"></i> Spróbuj ponownie
+        </button>
+      </div>
+    </div>
+  }
+</div>

@@ -19,8 +19,8 @@ const sdipService = {
         return response.data;
     },
 
-    getDepartures: async function() {
-        const response = await axios.get(DEPARTURE_URL);
+    getDepartures: async function(stopId) {
+        const response = await axios.get(`${DEPARTURE_URL}${stopId}`);
         return response.data;
     },
 
