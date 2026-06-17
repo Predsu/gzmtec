@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -6,7 +7,7 @@ import { Injectable } from '@angular/core';
 export class TripPlannerService {
 
   async getRoute(fromLat: number, fromLon: number, toLat: number, toLon: number, date: string, time: string) {
-    const url = `http://localhost:3000/api/trip/search?fromLat=${fromLat}&fromLon=${fromLon}&toLat=${toLat}&toLon=${toLon}&date=${date}&time=${time}`;
+    const url = `${environment.apiUrl}/api/trip/search?fromLat=${fromLat}&fromLon=${fromLon}&toLat=${toLat}&toLon=${toLon}&date=${date}&time=${time}`;
     
     try {
       const response = await fetch(url);
@@ -21,7 +22,7 @@ export class TripPlannerService {
   }
 
   async getAllStops() {
-    const url = `http://localhost:3000/api/stops`;
+    const url = `${environment.apiUrl}/api/stops`;
     try {
       const response = await fetch(url);
       if (!response.ok) {
