@@ -31,6 +31,7 @@
 <div class="bg-dark text-white py-5 mb-5 position-relative overflow-hidden" style="height: 100%; display: flex; align-items: center;">
   <div class="position-absolute w-100 h-100 opacity-25" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 20px 20px; top:0; left:0;"></div>
 
+@if (isOnline) {
 <div class="container animate__animated animate__fadeIn">
   <div class="card border-0 shadow-sm mx-auto my-4 bg-white rounded-3 bg-secondary-subtle" style="max-width: 550px;">
     <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
@@ -43,27 +44,40 @@
 
     <div class="card-body px-4 pt-4 pb-4">
       <form [formGroup]="searchForm" (ngSubmit)="onSubmit()" autocomplete="off">
-        
-        <div class="mb-4 position-relative">
+  
+        <div class="mb-3 position-relative">
           <label class="form-label text-uppercase text-muted fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">
             Miejsce startu
           </label>
           <div class="input-group input-group-sm shadow-sm rounded">
-            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-circle-fill" style="font-size: 0.6rem; color: #6c757d;"></i></span>
+            <span class="input-group-text bg-light border-end-0 text-muted">
+              <i class="bi bi-circle-fill" style="font-size: 0.6rem; color: #6c757d;"></i>
+            </span>
             <input type="text" class="form-control form-control-sm border-start-0" placeholder="Wpisz nazwę przystanku początkowego..." formControlName="fromStopName"
-                   [class.is-invalid]="searchForm.get('fromStopName')?.touched && (searchForm.get('fromStopName')?.invalid || !selectedFromStop)">
+                  [class.is-invalid]="searchForm.get('fromStopName')?.touched && (searchForm.get('fromStopName')?.invalid || !selectedFromStop)">
           </div>
           
           @if (filteredFromStops.length > 0) {
-            <ul class="list-group position-absolute w-100 shadow-lg bg-white rounded border border-light" style="z-index: 1050; max-height: 220px; overflow-y: auto; margin-top: 4px;">
+            <div class="position-absolute w-100 bg-white border border-light-subtle rounded shadow-lg mt-1 mh-50 overflow-y-auto" style="z-index: 1050; max-height: 200px;">
               @for (stop of filteredFromStops; track stop.id) {
-                <button type="button" class="list-group-item list-group-item-action py-2 px-3 border-0 text-start small d-flex justify-content-between align-items-center" (click)="selectFromStop(stop)">
-                  <span class="fw-semibold text-dark">{{ stop.name }}</span>
-                  <span class="badge bg-secondary bg-opacity-10 text-secondary text-uppercase font-monospace" style="font-size: 0.65rem;">{{ stop.municipality }}</span>
+                <button type="button" class="btn btn-link w-100 text-start text-decoration-none text-dark px-3 py-2 small border-bottom border-light-subtle d-flex justify-content-between align-items-center dropdown-item"
+                        (click)="selectFromStop(stop)">
+                  <span>
+                    <i class="bi bi-geo-alt text-muted me-2"></i>
+                    <span class="fw-semibold">{{ stop.name }}</span>
+                  </span>
+                  <span class="badge bg-light text-secondary border border-light-subtle font-monospace" style="font-size: 0.65rem;">{{ stop.municipality }}</span>
                 </button>
               }
-            </ul>
+            </div>
           }
+        </div>
+
+        <div class="d-flex justify-content-center my-2" style="position: relative; z-index: 10;">
+          <button type="button" class="btn btn-sm btn-outline-secondary rounded-circle shadow-sm px-2 py-1" 
+                  (click)="swapStops()" title="Zamień przystanki miejscami">
+            <i class="bi bi-arrow-down-up d-inline-block small"></i>
+          </button>
         </div>
 
         <div class="mb-4 position-relative">
@@ -71,33 +85,58 @@
             Miejsce docelowe
           </label>
           <div class="input-group input-group-sm shadow-sm rounded">
-            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-geo-alt-fill" style="font-size: 0.8rem; color: #dc3545;"></i></span>
+            <span class="input-group-text bg-light border-end-0 text-muted">
+              <i class="bi bi-geo-alt-fill" style="font-size: 0.8rem; color: #dc3545;"></i>
+            </span>
             <input type="text" class="form-control form-control-sm border-start-0" placeholder="Wpisz nazwę przystanku końcowego..." formControlName="toStopName"
-                   [class.is-invalid]="searchForm.get('toStopName')?.touched && (searchForm.get('toStopName')?.invalid || !selectedToStop)">
+                  [class.is-invalid]="searchForm.get('toStopName')?.touched && (searchForm.get('toStopName')?.invalid || !selectedToStop)">
           </div>
 
           @if (filteredToStops.length > 0) {
-            <ul class="list-group position-absolute w-100 shadow-lg bg-white rounded border border-light" style="z-index: 1050; max-height: 220px; overflow-y: auto; margin-top: 4px;">
+            <div class="position-absolute w-100 bg-white border border-light-subtle rounded shadow-lg mt-1 mh-50 overflow-y-auto" style="z-index: 1050; max-height: 200px;">
               @for (stop of filteredToStops; track stop.id) {
-                <button type="button" class="list-group-item list-group-item-action py-2 px-3 border-0 text-start small d-flex justify-content-between align-items-center" (click)="selectToStop(stop)">
-                  <span class="fw-semibold text-dark">{{ stop.name }}</span>
-                  <span class="badge bg-secondary bg-opacity-10 text-secondary text-uppercase font-monospace" style="font-size: 0.65rem;">{{ stop.municipality }}</span>
+                <button type="button" class="btn btn-link w-100 text-start text-decoration-none text-dark px-3 py-2 small border-bottom border-light-subtle d-flex justify-content-between align-items-center dropdown-item"
+                        (click)="selectToStop(stop)">
+                  <span>
+                    <i class="bi bi-geo-alt text-muted me-2"></i>
+                    <span class="fw-semibold">{{ stop.name }}</span>
+                  </span>
+                  <span class="badge bg-light text-secondary border border-light-subtle font-monospace" style="font-size: 0.65rem;">{{ stop.municipality }}</span>
                 </button>
               }
-            </ul>
+            </div>
           }
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label text-uppercase text-muted fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">
+            Kryterium czasu podróży
+          </label>
+          <div class="btn-group w-100 shadow-sm rounded" role="group">
+            <input type="radio" class="btn-check" name="timeMode" id="departureMode" 
+                  [checked]="!isArrivalMode" (change)="isArrivalMode = false" autocomplete="off">
+            <label class="btn btn-outline-dark btn-sm fw-semibold py-2" for="departureMode" style="font-size: 0.8rem;">
+              <i class="bi bi-box-arrow-right me-1"></i> Chcę odjechać o...
+            </label>
+
+            <input type="radio" class="btn-check" name="timeMode" id="arrivalMode" 
+                  [checked]="isArrivalMode" (change)="isArrivalMode = true" autocomplete="off">
+            <label class="btn btn-outline-dark btn-sm fw-semibold py-2" for="arrivalMode" style="font-size: 0.8rem;">
+              <i class="bi bi-box-arrow-in-right me-1"></i> Chcę być na miejscu o...
+            </label>
+          </div>
         </div>
 
         <div class="row g-3 mb-4">
           <div class="col-7">
-            <label class="form-label text-uppercase text-muted fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Data wyjazdu</label>
+            <label class="form-label text-uppercase text-muted fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Data</label>
             <input type="date" class="form-control form-control-sm shadow-sm rounded" formControlName="date"
-                   [class.is-invalid]="searchForm.get('date')?.touched && searchForm.get('date')?.invalid">
+                  [class.is-invalid]="searchForm.get('date')?.touched && searchForm.get('date')?.invalid">
           </div>
           <div class="col-5">
             <label class="form-label text-uppercase text-muted fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Godzina</label>
             <input type="time" class="form-control form-control-sm shadow-sm rounded" formControlName="time"
-                   [class.is-invalid]="searchForm.get('time')?.touched && searchForm.get('time')?.invalid">
+                  [class.is-invalid]="searchForm.get('time')?.touched && searchForm.get('time')?.invalid">
           </div>
         </div>
 
@@ -118,6 +157,26 @@
     </div>
   </div>
 </div>
+} @else {
+    <div class="row justify-content-center animate__animated animate__fadeIn">
+      <div class="col-md-6 text-center py-5">
+        <div class="card border border-light-subtle shadow-sm rounded-3 p-4 bg-white">
+          <div class="card-body">
+            <div class="mb-4">
+              <i class="bi bi-wifi-off text-danger" style="font-size: 3.5rem;"></i>
+            </div>
+            <h5 class="card-title fw-bold text-dark mb-2">Brak połączenia z siecią</h5>
+            <p class="card-text text-muted small px-3">
+              System monitoringu i prognozowania opóźnień <strong>GZMTEC</strong> wymaga aktywnego połączenia internetowego, aby przetwarzać dane z SDIP oraz Open-Meteo w czasie rzeczywistym.
+            </p>
+            <button type="button" class="btn btn-dark btn-sm fw-semibold px-4 py-2 mt-3 shadow-sm rounded-2" (click)="checkConnection()">
+              <i class="bi bi-arrow-clockwise me-1"></i> Spróbuj ponownie
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
 </div>
 
 <footer class="bg-white pt-5 pb-4 border-top">

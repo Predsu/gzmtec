@@ -1,8 +1,9 @@
-import { Component, inject, OnInit, signal } from '@angular/core'; // <-- Dodaj signal
+import { Component, inject, OnInit, effect, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService, FavoriteRoute } from '../auth-service';
 import { Router } from '@angular/router';
+import { Network } from '@capacitor/network';
 
 @Component({
   selector: 'app-user-dashboard',
@@ -14,8 +15,33 @@ export class UserDashboardComponent implements OnInit {
   private fb = inject(FormBuilder);
   protected authService = inject(AuthService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   isMenuCollapsed = true;
+
+  isOnline: boolean = true;
+
+  async setupOnlineListeners() {
+    try {
+      const status = await Network.getStatus();
+      this.isOnline = status.connected;
+      this.cdr.detectChanges();
+    } catch (e) {
+      console.error('Błąd pobierania statusu sieci:', e);
+    }
+
+    Network.addListener('networkStatusChange', status => {
+      console.log('Natywna zmiana stanu sieci w panelu:', status);
+      this.isOnline = status.connected;
+      this.cdr.detectChanges();
+    });
+  }
+
+  async checkConnection() {
+    const status = await Network.getStatus();
+    this.isOnline = status.connected;
+    this.cdr.detectChanges();
+  }
 
   toggleNavbar() {
     this.isMenuCollapsed = !this.isMenuCollapsed;
@@ -33,8 +59,14 @@ export class UserDashboardComponent implements OnInit {
   });
 
   async ngOnInit() {
-    if (this.authService.isLoggedIn()) {
-      await this.loadFavorites();
+    await this.setupOnlineListeners();
+
+    if (this.isOnline && this.authService.isLoggedIn()) {
+      try {
+        await this.loadFavorites();
+      } catch (err) {
+        console.error('Nie udało się załadować ulubionych tras:', err);
+      }
     }
   }
 
@@ -77,8 +109,16 @@ export class UserDashboardComponent implements OnInit {
   }
 
   applyRoute(route: FavoriteRoute) {
-    this.authService.activeFavoriteRoute.set(route);
-    this.router.navigate(['/plan-trip']);
+    this.router.navigate(['/plan-trip'], {
+      queryParams: {
+        fromName: route.from_stop_name,
+        fromLat: route.from_lat,
+        fromLon: route.from_lon,
+        toName: route.to_stop_name,
+        toLat: route.to_lat,
+        toLon: route.to_lon
+      }
+    });
   }
 
   onLogout() {
