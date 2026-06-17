@@ -45,9 +45,10 @@ describe('SdipService', () => {
             const mockDepartures = { departures: [] };
             axios.get.mockResolvedValue({ data: mockDepartures });
 
-            const result = await sdipService.getDepartures();
+            const mockStopId = '11737';
+            const result = await sdipService.getDepartures(mockStopId);
 
-            expect(axios.get).toHaveBeenCalledWith('https://sdip.transportgzm.pl/main?command=planner&action=sd&id=');
+            expect(axios.get).toHaveBeenCalledWith(`https://sdip.transportgzm.pl/main?command=planner&action=sd&id=${mockStopId}`);
             expect(result).toEqual(mockDepartures);
         });
     });
@@ -57,9 +58,10 @@ describe('SdipService', () => {
             const mockVehicle = { vehicleId: '123', speed: 45 };
             axios.get.mockResolvedValue({ data: mockVehicle });
 
-            const result = await sdipService.getVehicle();
+            const mockVid = '123';
+            const result = await sdipService.getVehicle(mockVid);
 
-            expect(axios.get).toHaveBeenCalledWith('https://sdip.transportgzm.pl/main?command=planner&action=v&vid=');
+            expect(axios.get).toHaveBeenCalledWith(`https://sdip.transportgzm.pl/main?command=planner&action=v&vid=${mockVid}`);
             expect(result).toEqual(mockVehicle);
         });
     });

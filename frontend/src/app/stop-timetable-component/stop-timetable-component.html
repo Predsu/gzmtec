@@ -1,0 +1,200 @@
+<title>Stop Timetable · GZMTEC</title>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center me-4" href="/">
+      <img src="gzmteclogo.png" class="rounded float-start" alt="Logo" style="height: 60px; width: auto; object-fit: contain;">
+    </a>
+
+    <button class="navbar-toggler" type="button" (click)="toggleNavbar()"aria-controls="navbarSdCt" [aria-expanded]="'!isMenuCollapsed'" 
+      aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" [class.show]="!isMenuCollapsed" id="navbarSdCt">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link text-secondary" href="/plan-trip">Planer Trasy</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active fw-bold text-dark" href="/stop-timetable">Tablice Przystankowe</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-secondary" href="/user-profile">Profil Użytkownika</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="bg-dark text-white py-5 mb-5 position-relative overflow-hidden" style="height: 100%; display: flex; align-items: center;">
+  <div class="position-absolute" style="width: 300px; height: 300px; background: rgba(255,255,255,0.03); border-radius: 50%; top: -100px; right: -50px;"></div>
+  <div class="position-absolute" style="width: 150px; height: 150px; background: rgba(255,255,255,0.02); border-radius: 50%; bottom: -50px; right: 150px;"></div>
+  
+  <div class="container position-relative" style="z-index: 2;">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h1 class="display-5 fw-bold mb-2">Tablice Odjazdów Live</h1>
+        <p class="lead text-muted mb-0" style="color: #a0aec0 !important;">
+          Podgląd ruchu pojazdów na przystankach zintegrowany z aktualnym opóźnieniem.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container mb-5" style="min-height: 400px;">
+  @if (isOnline) {
+    
+    <div class="card shadow-sm border border-light-subtle rounded-3 p-4 bg-white mb-4">
+      <form [formGroup]="searchForm" autocomplete="off">
+        <div class="position-relative">
+          <label class="form-label text-uppercase text-muted fw-bold small mb-2" style="font-size: 0.7rem; letter-spacing: 0.5px;">
+            Wyszukaj przystanek
+          </label>
+          <div class="input-group shadow-sm rounded">
+            <span class="input-group-text bg-light text-muted border-end-0 px-3"><i class="bi bi-search"></i></span>
+            <input type="text" class="form-control border-start-0 py-2" placeholder="Wpisz nazwę przystanku" formControlName="stopSearch">
+          </div>
+
+          @if (filteredStops.length > 0) {
+            <div class="position-absolute w-100 bg-white border border-light-subtle rounded shadow-lg mt-1 overflow-y-auto" style="z-index: 9999 !important; max-height: 250px; left: 0;">
+              @for (stop of filteredStops; track stop.id) {
+                <button type="button" class="btn btn-link w-100 text-start text-decoration-none text-dark px-3 py-2 border-bottom border-light-subtle dropdown-item d-flex justify-content-between align-items-center"
+                        (click)="selectStop(stop)">
+                  <span><i class="bi bi-geo-alt text-muted me-2"></i><strong>{{ stop.name }}</strong></span>
+                  <span class="badge bg-light text-secondary border font-monospace" style="font-size: 0.65rem;">{{ stop.municipality }}</span>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </form>
+    </div>
+
+    @if (selectedStop) {
+      <div class="card shadow-sm border border-light-subtle rounded-3 overflow-hidden bg-white">
+        
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3 px-4 border-0">
+          <div>
+            <h2 class="h5 mb-0 fw-bold d-flex align-items-center">
+              <i class="bi bi-display-fill text-warning me-2"></i> {{ selectedStop.name }}
+            </h2>
+            <small class="text-uppercase tracking-wider font-monospace text-muted" style="font-size: 0.65rem; color: #a0aec0 !important;">
+              Lokalizacja: {{ selectedStop.municipality }}
+            </small>
+          </div>
+          <button class="btn btn-sm btn-outline-light rounded-circle p-2" (click)="fetchLiveDepartures()" [disabled]="isLoading">
+            <i class="bi bi-arrow-clockwise d-inline-block" [class.bi-spin]="isLoading"></i>
+          </button>
+        </div>
+
+        <div class="card-body p-0 bg-light">
+          @if (departures.length > 0) {
+            <div class="list-group list-group-flush">
+              @for (dep of departures; track dep.lineLabel + dep.actualTime) {
+                <div class="list-group-item d-flex align-items-center justify-content-between py-3 px-4 bg-white border-bottom border-light-subtle">
+                  
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center justify-content-center bg-dark text-white fw-bolder rounded-2 font-monospace shadow-sm" 
+                         style="width: 52px; height: 38px; font-size: 1.15rem;">
+                      {{ dep.lineLabel }}
+                    </div>
+                    <div>
+                      <span class="text-uppercase text-muted fw-bold d-block" style="font-size: 0.55rem; letter-spacing: 0.5px;">Kierunek docelowy</span>
+                      <span class="fw-bold text-dark fs-6">{{ dep.direction }}</span>
+                    </div>
+                  </div>
+
+                  <div class="text-end">
+                    @if (dep.minutesLeft <= 0) {
+                      <span class="badge bg-danger text-white px-2 py-1 fw-bold text-uppercase shadow-sm" style="font-size: 0.7rem; letter-spacing: 0.5px;">
+                        <i class="bi bi-broadcast me-1"></i> Odjeżdża
+                      </span>
+                    } @else if (dep.minutesLeft < 60) {
+                      <span class="text-dark fw-bolder fs-4 font-monospace">{{ dep.minutesLeft }} <span class="fs-6 fw-normal text-muted">min</span></span>
+                    } @else {
+                      <span class="text-secondary fw-bold fs-5 font-monospace">{{ dep.actualTime }}</span>
+                    }
+
+                    <small class="d-block text-muted mt-1" style="font-size: 0.58rem;">
+                      @if (dep.isLive) {
+                        <span class="text-success fw-semibold"><i class="bi bi-rss-fill me-1"></i>Na żywo (GPS)</span>
+                      } @else {
+                        <span class="text-primary fw-semibold"><i class="bi bi-cpu-fill me-1"></i>Zsynchronizowane</span>
+                      }
+                    </small>
+                  </div>
+
+                </div>
+              }
+            </div>
+          } @else if (!isLoading) {
+            <div class="text-center py-5 bg-white text-muted rounded-bottom">
+              <i class="bi bi-slash-circle mb-2 d-block text-secondary" style="font-size: 2.2rem;"></i>
+              <p class="small mb-0 fw-semibold">Brak zaplanowanych kursów w najbliższych godzinach.</p>
+            </div>
+          }
+        </div>
+      </div>
+    } @else {
+      <div class="text-center py-5 border border-dashed rounded-3 bg-white shadow-sm border-light-subtle">
+        <i class="bi bi-window-sidebar mb-3 d-block text-muted opacity-50" style="font-size: 3.5rem;"></i>
+        <h5 class="fw-bold text-dark mb-1">Wirtualna Tablica Przystankowa</h5>
+        <p class="small text-muted px-4 mb-0">Wyszukaj interesujący Cię przystanek powyżej, aby zobaczyć odjazdy na żywo.</p>
+      </div>
+    }
+
+  } @else {
+    <div class="card border border-light-subtle shadow-sm rounded-3 p-5 bg-white text-center animate__animated animate__fadeIn">
+      <div class="card-body">
+        <i class="bi bi-wifi-off text-danger mb-3 d-block" style="font-size: 3.5rem;"></i>
+        <h5 class="card-title fw-bold text-dark">Brak połączenia z siecią</h5>
+        <p class="card-text text-muted small max-width-sm mx-auto">
+          Wirtualne tablice odjazdów wymagają aktywnego dostępu do internetu w celu pobierania świeżych struktur HTML z systemu SDIP GZM.
+        </p>
+        <button type="button" class="btn btn-dark btn-sm fw-semibold px-4 py-2 mt-3 shadow-sm rounded-2" (click)="checkConnection()">
+          <i class="bi bi-arrow-clockwise me-1"></i> Odśwież połączenie
+        </button>
+      </div>
+    </div>
+  }
+</div>
+
+<footer class="bg-light text-dark py-5 mt-auto border-top border-light-subtle">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6 mb-4 mb-md-0">
+        <div class="d-flex align-items-center mb-3">
+          <img src="gzmteclogo.png" alt="Logo" class="me-2 rounded" style="height: 40px; width: auto;">
+          <span class="fw-bold fs-5 tracking-tight text-dark">GZMTEC</span>
+        </div>
+        <p class="text-secondary small mb-0" style="max-width: 400px;">
+          Projekt integrujący system planowania tras z analizą  punktualności w Górnośląsko-Zagłębiowskiej Metropolii.
+        </p>
+      </div>
+      <div class="col-md-3 mb-4 mb-md-0">
+        <h6 class="text-uppercase fw-bold text-muted small mb-3" style="font-size: 0.75rem; letter-spacing: 0.5px;">Nawigacja systemu</h6>
+        <ul class="list-unstyled">
+          <li class="mb-2"><a href="/plan-trip" class="text-decoration-none text-secondary small" style="font-size: 0.85rem;"><i class="bi bi-chevron-right me-1"></i> Planer Podróży</a></li>
+          <li class="mb-2"><a href="/stop-timetable" class="text-decoration-none text-secondary small" style="font-size: 0.85rem;"><i class="bi bi-chevron-right me-1"></i> Tablice Przystankowe</a></li>
+          <li class="mb-2"><a href="/user-profile" class="text-decoration-none text-secondary small" style="font-size: 0.85rem;"><i class="bi bi-chevron-right me-1"></i> Panel i Ulubione</a></li>
+          <li class="mb-2"><a href="/backend-status" class="text-decoration-none text-secondary small" style="font-size: 0.85rem;"><i class="bi bi-chevron-right me-1"></i> Monitor Statusu API</a></li>
+        </ul>
+      </div>
+      <div class="col-md-3">
+        <h6 class="text-uppercase fw-bold text-muted small mb-3" style="font-size: 0.75rem; letter-spacing: 0.5px;">Zasoby zewnętrzne</h6>
+        <ul class="list-unstyled">
+          <li class="mb-2"><a href="https://sdip.transportgzm.pl" target="_blank" class="text-decoration-none text-secondary small" style="font-size: 0.85rem;"><i class="bi bi-box-arrow-up-right me-1"></i> Oficjalny SDIP GZM</a></li>
+          <li class="mb-2"><a href="https://www.opentripplanner.org" target="_blank" class="text-decoration-none text-secondary small" style="font-size: 0.85rem;"><i class="bi bi-box-arrow-up-right me-1"></i> OpenTripPlanner Docs</a></li>
+        </ul>
+      </div>
+    </div>
+    <hr class="my-4 text-muted opacity-25">
+    <div class="text-center text-muted small d-flex align-items-center justify-content-center gap-2" style="font-size: 0.8rem;">
+      <img src="https://i0.wp.com/opensource.org/wp-content/uploads/2009/08/osi_black_and_white_light_backgrounds_logo_0.png?w=1500&quality=80&ssl=1" 
+       alt="Open Source Logo" 
+       style="height: 1em; vertical-align: middle;"> 2026 GZMTEC by <a href="https://github.com/Predsu" class="text-warning">ToriYukari</a>
+    </div>
+  </div>
+</footer>

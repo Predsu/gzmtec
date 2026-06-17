@@ -19,13 +19,13 @@ const sdipService = {
         return response.data;
     },
 
-    getDepartures: async function() {
-        const response = await axios.get(DEPARTURE_URL);
+    getDepartures: async function(stopId) {
+        const response = await axios.get(`${DEPARTURE_URL}${stopId || ''}`);
         return response.data;
     },
 
-    getVehicle: async function() {
-        const response = await axios.get(VEHICLE_BY_VID_URL);
+    getVehicle: async function(vid) {
+        const response = await axios.get(`${VEHICLE_BY_VID_URL}${vid || ''}`);
         return response.data;
     },
 
