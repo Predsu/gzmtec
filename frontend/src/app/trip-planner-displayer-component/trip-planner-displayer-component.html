@@ -1,8 +1,8 @@
 <title>Routes · GZMTEC</title>
-<nav class="navbar navbar-expand-lg navbar-light bg-white">
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container">
-    <a class="navbar-brand bg-white" href="/">
-      <img src="gzmteclogo.png" class="rounded float-start w-25" alt="Logo">
+    <a class="navbar-brand d-flex align-items-center me-4" href="/">
+      <img src="gzmteclogo.png" class="rounded float-start" alt="Logo" style="height: 60px; width: auto; object-fit: contain;">
     </a>
 
     <button 
@@ -46,7 +46,7 @@
       
       <div class="d-flex justify-content-between align-items-center mb-3 px-1">
         <div>
-          <h6 class="text-uppercase tracking-wider text-muted fw-bold mb-0" style="font-size: 0.75rem; letter-spacing: 0.5px;">Wariant trasy</h6>
+          <h6 class="text-uppercase tracking-wider text-light fw-bold mb-0" style="font-size: 0.75rem; letter-spacing: 0.5px;">Wariant trasy</h6>
           <small class="text-secondary fw-semibold">{{ currentItineraryIndex + 1 }} z {{ itineraries.length }}</small>
         </div>
         
@@ -119,9 +119,11 @@
                         @if (leg.mode === 'WALK') {
                           <span class="badge bg-secondary text-white px-2 py-1.5 rounded d-inline-flex align-items-center"><i class="bi bi-person-walking me-1"></i> PIESZO</span>
                         } @else if (leg.mode === 'BUS') {
-                          <span class="badge bg-danger text-white px-2 py-1.5 rounded d-inline-flex align-items-center fw-bold"><i class="bi bi-bus-front me-1"></i> LINIA {{ leg.route?.shortName }}</span>
+                          <span class="badge bg-danger text-white px-2 py-1.5 rounded d-inline-flex align-items-center fw-bold"><i class="bi bi-bus-front me-1"></i> AUTOBUS {{ leg.route?.shortName }}</span>
                         } @else if (leg.mode === 'TRAM') {
                           <span class="badge bg-primary text-white px-2 py-1.5 rounded d-inline-flex align-items-center fw-bold"><i class="bi bi-train-front me-1"></i> TRAMWAJ {{ leg.route?.shortName }}</span>
+                        } @else if (leg.mode === "TROLLEYBUS") {
+                          <span class="badge bg-warning text-body px-2 py-1.5 rounded d-inline-flex align-items-center fw-bold"><i class="bi bi-train-lightrail-front me-1"></i> TROLEJBUS {{ leg.route?.shortName }}</span>
                         }
                         <span class="text-secondary small fw-medium"><i class="bi bi-hourglass-split me-0.5"></i> Czas: {{ Math.round(leg.duration / 60) }} min</span>
                       </div>
@@ -132,7 +134,7 @@
                             <span class="text-muted"><i class="bi bi-calculator me-1"></i> Obliczone opóźnienie:</span>
                             @if (leg.predictedDeviationMinutes !== undefined) {
                               @if (leg.predictedDeviationMinutes > 0) {
-                                <span class="text-danger fw-bold"><i class="bi bi-exclamation-triangle-fill me-0.5"></i> Opóźnienie: +{{ leg.predictedDeviationMinutes }} min</span>
+                                <span class="text-danger fw-bold"><i class="bi bi-exclamation-triangle-fill me-0.5"></i> +{{ leg.predictedDeviationMinutes }} min</span>
                               } @else {
                                 <span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-0.5"></i> Planowo (0 min)</span>
                               }
@@ -142,8 +144,8 @@
                           </div>
                           
                           <div class="d-flex align-items-center justify-content-between text-muted" style="font-size: 0.75rem;">
-                            <span><i class="bi bi-database me-1"></i> Próbki w bazie SDIP:</span>
-                            <span class="fw-semibold text-dark">{{ leg.predictedSamplesCount || 0 }} przejazdów</span>
+                            <span><i class="bi bi-database me-1"></i> Znaczące próbki:</span>
+                            <span class="fw-semibold text-dark">{{ leg.predictedSamplesCount || 0 }} kursów</span>
                           </div>
 
                           @if (leg.expectedStartTime) {

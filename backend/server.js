@@ -10,10 +10,12 @@ envValidator();
 const app = express();
 
 app.use(cors({
-  origin: 'http://localhost:4200',
+  origin: function (origin, callback) {
+    callback(null, true);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: '*',
 }));
 
 const PORT = process.env.PORT || 3000;
