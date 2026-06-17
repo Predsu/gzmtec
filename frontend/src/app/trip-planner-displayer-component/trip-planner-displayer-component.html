@@ -21,6 +21,9 @@
           <a class="nav-link active text-secondary" aria-current="page" href="/plan-trip">Planer Trasy</a>
         </li>
         <li class="nav-item">
+          <a class="nav-link active fw-bold text-secondary" href="/stop-timetable">Tablice Przystankowe</a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link text-secondary" href="/user-profile">Profil Użytkownika</a>
         </li>
       </ul>
@@ -215,32 +218,37 @@
 </div>
 </div>
 
-<footer class="bg-white pt-5 pb-4 border-top">
+<footer class="bg-light text-dark py-5 mt-auto border-top border-light-subtle">
   <div class="container">
-    <div class="row g-4 justify-content-between">
-      <div class="col-md-4">
-        <h5 class="fw-bold text-dark mb-3">GZMTEC</h5>
-        <p class="text-muted small">Projekt integrujący system planowania tras z analizą matematyczną punktualności w Górnośląsko-Zagłębiowskiej Metropolii.</p>
-        <span class="badge bg-success bg-opacity-10 text-success rounded-pill border border-success border-opacity-25">Wersja 1.0.0</span>
+    <div class="row">
+      <div class="col-md-6 mb-4 mb-md-0">
+        <div class="d-flex align-items-center mb-3">
+          <img src="gzmteclogo.png" alt="Logo" class="me-2 rounded" style="height: 40px; width: auto;">
+          <span class="fw-bold fs-5 tracking-tight text-dark">GZMTEC</span>
+        </div>
+        <p class="text-secondary small mb-0" style="max-width: 400px;">
+          Projekt integrujący system planowania tras z analizą  punktualności w Górnośląsko-Zagłębiowskiej Metropolii.
+        </p>
       </div>
-      <div class="col-md-3">
-        <h6 class="text-uppercase fw-bold text-muted small mb-3">Skróty nawigacyjne</h6>
+      <div class="col-md-3 mb-4 mb-md-0">
+        <h6 class="text-uppercase fw-bold text-muted small mb-3" style="font-size: 0.75rem; letter-spacing: 0.5px;">Nawigacja systemu</h6>
         <ul class="list-unstyled">
-          <li class="mb-2"><a href="/plan-trip" class="text-decoration-none text-secondary small-link"><i class="bi bi-chevron-right me-1"></i> Planer Podróży</a></li>
-          <li class="mb-2"><a href="/user-profile" class="text-decoration-none text-secondary small-link"><i class="bi bi-chevron-right me-1"></i> Panel i Ulubione</a></li>
-          <li class="mb-2"><a href="/backend-status" class="text-decoration-none text-secondary small-link"><i class="bi bi-chevron-right me-1"></i> Monitor Statusu API</a></li>
+          <li class="mb-2"><a href="/plan-trip" class="text-decoration-none text-secondary small" style="font-size: 0.85rem;"><i class="bi bi-chevron-right me-1"></i> Planer Podróży</a></li>
+          <li class="mb-2"><a href="/stop-timetable" class="text-decoration-none text-secondary small" style="font-size: 0.85rem;"><i class="bi bi-chevron-right me-1"></i> Tablice Przystankowe</a></li>
+          <li class="mb-2"><a href="/user-profile" class="text-decoration-none text-secondary small" style="font-size: 0.85rem;"><i class="bi bi-chevron-right me-1"></i> Panel i Ulubione</a></li>
+          <li class="mb-2"><a href="/backend-status" class="text-decoration-none text-secondary small" style="font-size: 0.85rem;"><i class="bi bi-chevron-right me-1"></i> Monitor Statusu API</a></li>
         </ul>
       </div>
       <div class="col-md-3">
-        <h6 class="text-uppercase fw-bold text-muted small mb-3">Zasoby zewnętrzne</h6>
+        <h6 class="text-uppercase fw-bold text-muted small mb-3" style="font-size: 0.75rem; letter-spacing: 0.5px;">Zasoby zewnętrzne</h6>
         <ul class="list-unstyled">
-          <li class="mb-2"><a href="https://sdip.transportgzm.pl" target="_blank" class="text-decoration-none text-secondary small-link"><i class="bi bi-box-arrow-up-right me-1"></i> Oficjalny SDIP GZM</a></li>
-          <li class="mb-2"><a href="https://www.opentripplanner.org" target="_blank" class="text-decoration-none text-secondary small-link"><i class="bi bi-box-arrow-up-right me-1"></i> OpenTripPlanner Docs</a></li>
+          <li class="mb-2"><a href="https://sdip.transportgzm.pl" target="_blank" class="text-decoration-none text-secondary small" style="font-size: 0.85rem;"><i class="bi bi-box-arrow-up-right me-1"></i> Oficjalny SDIP GZM</a></li>
+          <li class="mb-2"><a href="https://www.opentripplanner.org" target="_blank" class="text-decoration-none text-secondary small" style="font-size: 0.85rem;"><i class="bi bi-box-arrow-up-right me-1"></i> OpenTripPlanner Docs</a></li>
         </ul>
       </div>
     </div>
     <hr class="my-4 text-muted opacity-25">
-    <div class="text-center text-muted small">
+    <div class="text-center text-muted small d-flex align-items-center justify-content-center gap-2" style="font-size: 0.8rem;">
       <img src="https://i0.wp.com/opensource.org/wp-content/uploads/2009/08/osi_black_and_white_light_backgrounds_logo_0.png?w=1500&quality=80&ssl=1" 
        alt="Open Source Logo" 
        style="height: 1em; vertical-align: middle;"> 2026 GZMTEC by <a href="https://github.com/Predsu" class="text-warning">ToriYukari</a>
