@@ -20,12 +20,12 @@ const sdipService = {
     },
 
     getDepartures: async function(stopId) {
-        const response = await axios.get(`${DEPARTURE_URL}${stopId}`);
+        const response = await axios.get(`${DEPARTURE_URL}${stopId || ''}`);
         return response.data;
     },
 
-    getVehicle: async function() {
-        const response = await axios.get(VEHICLE_BY_VID_URL);
+    getVehicle: async function(vid) {
+        const response = await axios.get(`${VEHICLE_BY_VID_URL}${vid || ''}`);
         return response.data;
     },
 
