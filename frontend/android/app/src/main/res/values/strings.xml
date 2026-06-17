@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">GZMTEC</string>
+    <string name="title_activity_main">GZMTEC</string>
+    <string name="package_name">com.toriyukari.gzmtec</string>
+    <string name="custom_url_scheme">com.toriyukari.gzmtec</string>
+</resources>
