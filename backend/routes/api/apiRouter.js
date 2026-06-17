@@ -1,5 +1,6 @@
 const express = require("express")
 const router = express.Router()
+const cheerio = require("cheerio");
 const deviationOperationsController = require('../../controllers/deviationOperations.controller')
 const tripPlannerController = require('../../controllers/tripPlanner.controller')
 const apiStatusController = require("../../controllers/apiStatus.controller")
@@ -22,62 +23,91 @@ router.get('/stops', async (req, res) => {
 router.get('/stops/:id/departures', async (req, res) => {
     try {
         const stopId = req.params.id;
-        // 1. Pobieramy surowe dane odjazdów z SDIP GZM
-        const sdipData = await sdipService.getDepartures(stopId);
+        
+        const htmlData = await sdipService.getDepartures(stopId);
 
-        // Zakładamy strukturę SDIP: zazwyczaj zwraca tablicę obiektów w polu passages lub bezpośrednio tablicę
-        // Dostosuj mapowanie (np. sdipData.passages) jeśli struktura ZTM tego wymaga
-        const rawPassages = Array.isArray(sdipData) ? sdipData : (sdipData.passages || []);
+        const $ = cheerio.load(htmlData);
+        const parsedDepartures = [];
+
+        $(".departure").each((index, element) => {
+            const departureDiv = $(element);
+            
+            const classAttr = departureDiv.attr("class") || "";
+            const isLive = classAttr.includes("status-1") || classAttr.includes("live");
+
+            const lineLabel = departureDiv.find(".line").text().trim() || "---";
+            const direction = departureDiv.find(".destination").text().trim() || "Kierunek nieznany";
+            const timeText = departureDiv.find(".time").text().trim();
+
+            let minutesLeft = 0;
+            let actualTime = "";
+
+            if (timeText.toLowerCase().includes("min")) {
+                minutesLeft = parseInt(timeText.replace(/[^0-9]/g, ""), 10) || 0;
+                
+                const d = new Date();
+                d.setMinutes(d.getMinutes() + minutesLeft);
+                actualTime = d.toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" });
+            } else if (timeText.includes(":")) {
+                actualTime = timeText;
+                
+                const now = new Date();
+                const [hours, minutes] = timeText.split(":").map(Number);
+                const departureDate = new Date();
+                departureDate.setHours(hours, minutes, 0, 0);
+
+                if (departureDate < now && (now.getHours() > 20 && hours < 4)) {
+                    departureDate.setDate(departureDate.getDate() + 1);
+                }
+
+                const diffMs = departureDate.getTime() - now.getTime();
+                minutesLeft = Math.max(0, Math.round(diffMs / 60000));
+            } else {
+                actualTime = timeText;
+                minutesLeft = 0;
+            }
+
+            parsedDepartures.push({
+                lineLabel,
+                direction,
+                minutesLeft,
+                actualTime,
+                isLive
+            });
+        });
 
         const now = new Date();
         const secondsSinceMidnight = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-        
-        // Pobieramy nazwę dnia tygodnia dla Twojego modelu bazy danych
         const weekday = new Intl.DateTimeFormat('en-US', { weekday: 'long', timeZone: 'Europe/Warsaw' }).format(now);
 
-        const mappedDepartures = await Promise.all(rawPassages.map(async (passage) => {
-            // Przykładowe mapowanie pól z oficjalnego SDIP GZM:
-            // lineLabel/line, direction, minutesLeft/countdown lub czas podany jako string
-            const lineLabel = passage.line || passage.lineLabel || "---";
-            const direction = passage.direction || "Kierunek nieznany";
-            
-            // Sprawdzenie czy odjazd jest LIVE (GPS) czy tylko rozkładowy (SCHEDULED)
-            const isLive = passage.isLive ?? (passage.status === 'LIVE' || passage.realTime === true);
-            let minutesLeft = passage.minutesLeft ?? passage.countdown ?? 0;
-
-            // Integracja GZMTEC: Jeśli pojazd jedzie tylko według rozkładu (brak GPS), 
-            // sprawdzamy historyczne opóźnienia w bazie danych dla tej linii i przystanku!
-            if (!isLive) {
+        const finalDepartures = await Promise.all(parsedDepartures.map(async (dep) => {
+            if (!dep.isLive) {
                 try {
                     const samplesList = await deviationOperationsModel.getAvgDeviationByLineStopTime(
-                        lineLabel, stopId, secondsSinceMidnight, 1800, weekday
+                        dep.lineLabel, stopId, secondsSinceMidnight, 1800, weekday
                     );
+                    
                     if (samplesList && samplesList.length > 0) {
                         const logSum = samplesList.reduce((sum, row) => sum + Math.log(row.deviation + 1), 0);
                         const logAverage = logSum / samplesList.length;
                         const predictedDeviation = Math.round(Math.exp(logAverage) - 1);
                         
-                        // Korygujemy czas pasażerowi na bazie statystyk GZMTEC
-                        minutesLeft += predictedDeviation;
+                        dep.minutesLeft = Math.max(0, dep.minutesLeft + predictedDeviation);
                     }
                 } catch (dbErr) {
-                    console.error("GZMTEC DB Error w tablicy odjazdów:", dbErr.message);
+                    console.error("[GZMTEC DB Error] Nie udało się nałożyć poprawki:", dbErr.message);
                 }
             }
-
-            return {
-                lineLabel,
-                direction,
-                minutesLeft: minutesLeft < 0 ? 0 : minutesLeft,
-                actualTime: passage.actualTime || passage.time || "",
-                isLive: isLive
-            };
+            return dep;
         }));
 
-        res.status(200).json(mappedDepartures);
+        finalDepartures.sort((a, b) => a.minutesLeft - b.minutesLeft);
+
+        res.status(200).json(finalDepartures);
+
     } catch (error) {
-        console.error("Błąd generowania wirtualnej tablicy odjazdów GZMTEC:", error.message);
-        res.status(500).json({ message: "Błąd serwisu SDIP/Bazy danych przy pobieraniu odjazdów" });
+        console.error("Błąd parsowania HTML tablicy SDIP GZM:", error.message);
+        res.status(500).json({ message: "Błąd przetwarzania danych tablicy odjazdów" });
     }
 });
 
