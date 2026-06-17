@@ -20,30 +20,27 @@ The repository is splitted into two main catalogues:
 - npm 11
 - Node.js 24
 - Angular 21
+- OTP 2.9.0
+- XAMPP (or any other local database software)
 
-## Installation (DEV)
-
-### Option A - using public server
-
-This option assumes the user doesn't want to set up their own local database and JavaVM running the engine. However it still assumes that frontend and backend processing the connections with remote server will be running locally. For installation of already built product see Option B.
+## Installation
 
 1. Run `npm install` in both `frontend` and `backend` catalogue
-2. Create the `.env` file in `backend` catalogue, for public server it should look like that:
+2. Create the `.env` file in `backend` catalogue, follow the `.env.example`
+3. Run `ng g environments` and fill them like that:
+```ts
+export const environment = {
+  production: true/false,
+  apiUrl: 'ipaddressofyourserver/localhost' 
+};
 ```
-PORT = 3000
-DB_HOST = 'gzmtec.duckdns.org'
-DB_PORT = 8801
-DB_USER = 'gzmtec_public'
-DB_PASSWORD = ''
-DB_DBNAME = 'gzmtec'
-DB_FRONTEND_URL = 'http://localhost:4200'
-JVM_HOST = 'gzmtec.duckdns.org'
-JVM_PORT = 8803
-```
-3. Requests to the engine are available through URL: `localhost:4200/plan-trip`
-
-### Option B - Getting Pre-Built App (Android)
-
-WIP
-
-## 
+5. Setup a local database with schema located in `template.sql` and fill them with your data.
+6. Download GTFS files of your choice. Also get PBF map file of your area. Put them all in a folder of your choice. Remember to have "gtfs" phrase somewhere in GTFS files names. 
+7. Run a local OTP instance on your server. The OTP is available [here](https://www.opentripplanner.org/). Localization of OTP jar can be anywhere. You can use the command `java -Xmx8G -jar otp-jar.jar --build --serve ./otp-data` where otp-jar.jar is where your OTP jar is located and ./otp-data is the folder where GTFS and PBF files are located.
+8. Run `node server.js` in backend folder and `ng serve --host 0.0.0.0` in frontend folder. Make sure CORS policies do not lock out your app in any way. 
+9. The app is available at `localhost:4200`. If you don't want to run only locally we recommend to forward the following apps ports on your router:
+- database (if using XAMPP: port 3306)
+- JVM with OTP (usually port 8080)
+- backend (as we specified in the code port 3000)
+- frontend (as we specified in the code port 4200)
+Remember to eventually adjust changed addresses in `environments` in frontend and `.env` in backend.
