@@ -7,7 +7,7 @@ import { environment } from '../environments/environment';
 export class TripPlannerService {
 
   async getRoute(fromLat: number, fromLon: number, toLat: number, toLon: number, date: string, time: string) {
-    const url = `${environment.apiUrl}/api/trip/search?fromLat=${fromLat}&fromLon=${fromLon}&toLat=${toLat}&toLon=${toLon}&date=${date}&time=${time}`;
+    const url = `http://${environment.apiUrl}/api/trip/search?fromLat=${fromLat}&fromLon=${fromLon}&toLat=${toLat}&toLon=${toLon}&date=${date}&time=${time}`;
     
     try {
       const response = await fetch(url);
@@ -22,7 +22,7 @@ export class TripPlannerService {
   }
 
   async getAllStops() {
-    const url = `${environment.apiUrl}/api/stops`;
+    const url = `http://${environment.apiUrl}/api/stops`;
     try {
       const response = await fetch(url);
       if (!response.ok) {
