@@ -38,6 +38,8 @@ export class StopTimetableComponent implements OnInit, OnDestroy {
   selectedStop: SdipStop | null = null;
   departures: LiveDeparture[] = [];
 
+  private rawStopsDatabase: SdipStop[] = [];
+
   private refreshIntervalId: any = null;
 
   toggleNavbar() {
@@ -45,32 +47,15 @@ export class StopTimetableComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    // 1. Sprawdź i nasłuchuj sieć przez Capacitora bez blokowania UI
     await this.setupOnlineListeners();
-
     if (this.isOnline) {
-      this.loadStopsDatabase();
+      await this.loadStopsDatabase();
     }
 
-    // 2. Błyskawiczny autocomplete wyszukiwania przystanku (50ms debounetime)
     this.searchForm.get('stopSearch')?.valueChanges
-      .pipe(debounceTime(50))
-      .subscribe(value => {
-        if (!value || value.trim().length < 1) {
-          this.filteredStops = [];
-          return;
-        }
-
-        if (this.selectedStop && value === this.selectedStop.name) {
-          this.filteredStops = [];
-        } else {
-          const filterValue = value.toLowerCase();
-          this.filteredStops = this.allUniqueStops.filter(stop =>
-            stop.name.toLowerCase().includes(filterValue) ||
-            stop.municipality.toLowerCase().includes(filterValue)
-          ).slice(0, 8);
-        }
-        this.cdr.detectChanges();
+      .pipe(debounceTime(150))
+      .subscribe(val => {
+        this.filterStops(val);
       });
   }
 
@@ -78,38 +63,81 @@ export class StopTimetableComponent implements OnInit, OnDestroy {
     this.clearAutoRefresh();
   }
 
-  loadStopsDatabase() {
-    this.tripService.getAllStops().then((stops: SdipStop[]) => {
-      const uniqueMap = new Map<string, SdipStop>();
-      stops.forEach(stop => {
-        if (!uniqueMap.has(stop.name)) {
-          uniqueMap.set(stop.name, stop);
+  async loadStopsDatabase() {
+    try {
+      const data = await this.tripService.getAllStops();
+      this.rawStopsDatabase = data || [];
+
+      const seen = new Set<string>();
+      this.allUniqueStops = [];
+
+      for (const stop of this.rawStopsDatabase) {
+        const key = `${stop.name.toLowerCase()}||${stop.municipality.toLowerCase()}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          this.allUniqueStops.push(stop);
         }
-      });
-      this.allUniqueStops = Array.from(uniqueMap.values());
-    });
+      }
+      this.filteredStops = [...this.allUniqueStops];
+    } catch (err) {
+      console.error('Błąd inicjalizacji bazy przystanków:', err);
+    }
   }
 
-  async selectStop(stop: SdipStop) {
+  filterStops(value: string) {
+    if (!value || value.trim().length < 2) {
+      this.filteredStops = [];
+      return;
+    }
+    const low = value.toLowerCase();
+    this.filteredStops = this.allUniqueStops.filter(s => 
+      s.name.toLowerCase().includes(low) || s.municipality.toLowerCase().includes(low)
+    );
+  }
+
+  selectStop(stop: SdipStop) {
     this.selectedStop = stop;
-    this.searchForm.get('stopSearch')?.setValue(stop.name, { emitEvent: false });
+    this.searchForm.get('stopSearch')?.setValue(`${stop.name} (${stop.municipality})`, { emitEvent: false });
     this.filteredStops = [];
     
-    await this.fetchLiveDepartures();
+    this.fetchLiveDepartures();
     this.startAutoRefresh();
   }
 
   async fetchLiveDepartures() {
-    if (!this.selectedStop || !this.isOnline) return;
+    if (!this.selectedStop) return;
 
     this.isLoading = true;
     this.cdr.detectChanges();
 
     try {
-      const data = await this.tripService.getStopDepartures(this.selectedStop.id);
-      this.departures = data || [];
+      const matchingStops = this.rawStopsDatabase.filter(s => 
+        s.name.toLowerCase() === this.selectedStop!.name.toLowerCase() &&
+        s.municipality.toLowerCase() === this.selectedStop!.municipality.toLowerCase()
+      );
+
+      const idsToFetch = matchingStops.map(s => s.id);
+
+      if (idsToFetch.length === 0) {
+        this.departures = [];
+        return;
+      }
+
+      const fetchPromises = idsToFetch.map(id => this.tripService.getStopDepartures(id));
+      const results = await Promise.all(fetchPromises);
+
+      let aggregatedDepartures: LiveDeparture[] = [];
+      for (const list of results) {
+        if (Array.isArray(list)) {
+          aggregatedDepartures.push(...list);
+        }
+      }
+
+      aggregatedDepartures.sort((a, b) => a.minutesLeft - b.minutesLeft);
+
+      this.departures = aggregatedDepartures;
     } catch (err) {
-      console.error('Błąd pobierania tablicy odjazdów:', err);
+      console.error('Błąd pobierania zbiorczej tablicy odjazdów:', err);
     } finally {
       this.isLoading = false;
       this.cdr.detectChanges();
@@ -118,7 +146,6 @@ export class StopTimetableComponent implements OnInit, OnDestroy {
 
   startAutoRefresh() {
     this.clearAutoRefresh();
-    // Samoczynne odświeżanie tablicy co 20 sekund
     this.refreshIntervalId = setInterval(() => {
       this.fetchLiveDepartures();
     }, 20000);
@@ -152,10 +179,11 @@ export class StopTimetableComponent implements OnInit, OnDestroy {
   }
 
   async checkConnection() {
-    const status = await Network.getStatus();
-    this.isOnline = status.connected;
-    if (this.isOnline && this.allUniqueStops.length === 0) {
-      this.loadStopsDatabase();
+    try {
+      const status = await Network.getStatus();
+      this.isOnline = status.connected;
+    } catch (e) {
+      this.isOnline = navigator.onLine;
     }
     this.cdr.detectChanges();
   }
