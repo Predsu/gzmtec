@@ -11,6 +11,7 @@
 [![codecov](https://codecov.io/github/Predsu/gzmtec/branch/main/graph/badge.svg)](https://codecov.io/github/Predsu/gzmtec)
 <img src="https://img.shields.io/github/last-commit/Predsu/gzmtec?style=flat&logo=git&logoColor=white&color=0080ff" alt="last-commit">
 <img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/w/Predsu/gzmtec">
+<img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/Predsu/gzmtec">
 
 <em>Built with the tools and technologies:</em>
 
